@@ -237,7 +237,9 @@ export default function AuthPage() {
             ) : (
               <form onSubmit={handleRegisterSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <FormLabel htmlFor="full_name">Full Name</FormLabel>
+                  <label htmlFor="full_name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Full Name
+                  </label>
                   <Input
                     id="full_name"
                     type="text"
@@ -248,7 +250,9 @@ export default function AuthPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <FormLabel htmlFor="username">Username</FormLabel>
+                  <label htmlFor="username" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Username
+                  </label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-muted-foreground">
                       <User className="h-4 w-4" />
@@ -265,7 +269,9 @@ export default function AuthPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <FormLabel htmlFor="password">Password</FormLabel>
+                  <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Password
+                  </label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-muted-foreground">
                       <Lock className="h-4 w-4" />
@@ -282,7 +288,9 @@ export default function AuthPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+                  <label htmlFor="confirmPassword" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Confirm Password
+                  </label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-muted-foreground">
                       <Lock className="h-4 w-4" />

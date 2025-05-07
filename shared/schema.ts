@@ -53,7 +53,32 @@ export const achievementsRelations = relations(achievements, ({ one }) => ({
 
 // Create insert schemas using drizzle-zod
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
-export const insertShiftSchema = createInsertSchema(shifts).omit({ id: true, created_at: true });
+// Create base insert schema for shifts
+export const baseInsertShiftSchema = createInsertSchema(shifts).omit({ id: true, created_at: true });
+
+// Modified insert schema for shifts that handles numeric fields more flexibly
+export const insertShiftSchema = baseInsertShiftSchema
+  .extend({
+    break_time: z.union([z.string(), z.number()]).transform(val => String(val)),
+    hourly_rate: z.union([z.string(), z.number()]).transform(val => String(val)),
+    total_pay: z.union([z.string(), z.number()]).transform(val => String(val)),
+  });
+  
+// Create a schema for partial updates to shifts
+export const updateShiftSchema = z.object({
+  date: z.union([z.string(), z.date()]).transform(val => {
+    if (val instanceof Date) {
+      return val.toISOString().split('T')[0];
+    }
+    return val;
+  }).optional(),
+  start_time: z.string().optional(),
+  end_time: z.string().optional(),
+  break_time: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  notes: z.string().nullable().optional(),
+  hourly_rate: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  total_pay: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+});
 export const insertAchievementSchema = createInsertSchema(achievements).omit({ id: true, unlocked_at: true });
 
 // Create validation schemas
@@ -96,3 +121,4 @@ export type UserLogin = z.infer<typeof userLoginSchema>;
 export type UserRegister = z.infer<typeof userRegisterSchema>;
 export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 export type UpdatePassword = z.infer<typeof updatePasswordSchema>;
+export type UpdateShift = z.infer<typeof updateShiftSchema>;

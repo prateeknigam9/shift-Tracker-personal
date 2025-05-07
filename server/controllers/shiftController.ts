@@ -3,7 +3,7 @@ import { storage } from "../storage";
 import { eq } from "drizzle-orm";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
-import { insertShiftSchema } from "@shared/schema";
+import { insertShiftSchema, updateShiftSchema } from "@shared/schema";
 
 export const getShifts = async (req: Request, res: Response) => {
   try {
@@ -49,18 +49,11 @@ export const createShift = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
     
-    // Prepare shift data - ensure numeric fields are properly formatted as strings
-    const formattedData = {
+    // Validate shift data - the schema will handle type conversion for numeric fields
+    const shiftData = insertShiftSchema.parse({
       ...req.body,
-      user_id: req.user.id,
-      // Convert numeric values to strings if they aren't already
-      break_time: typeof req.body.break_time === 'number' ? String(req.body.break_time) : req.body.break_time,
-      hourly_rate: typeof req.body.hourly_rate === 'number' ? String(req.body.hourly_rate) : req.body.hourly_rate,
-      total_pay: typeof req.body.total_pay === 'number' ? String(req.body.total_pay) : req.body.total_pay
-    };
-    
-    // Validate shift data
-    const shiftData = insertShiftSchema.parse(formattedData);
+      user_id: req.user.id
+    });
     
     // Calculate total pay if not provided
     if (!shiftData.total_pay) {
@@ -110,21 +103,8 @@ export const updateShift = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Shift not found" });
     }
     
-    // Prepare and format updated data
-    const updateData = { ...req.body };
-    
-    // Convert numeric values to strings
-    if (typeof updateData.break_time === 'number') {
-      updateData.break_time = String(updateData.break_time);
-    }
-    
-    if (typeof updateData.hourly_rate === 'number') {
-      updateData.hourly_rate = String(updateData.hourly_rate);
-    }
-    
-    if (typeof updateData.total_pay === 'number') {
-      updateData.total_pay = String(updateData.total_pay);
-    }
+    // Validate and transform the update data using the schema
+    const updateData = updateShiftSchema.parse(req.body);
     
     // Calculate total pay if times or rates are updated
     if (updateData.start_time || updateData.end_time || 

@@ -1,4 +1,4 @@
-import { users, shifts, achievements, type User, type InsertUser, type Shift, type InsertShift, type Achievement, type InsertAchievement } from "@shared/schema";
+import { users, shifts, achievements, pay_schedules, type User, type InsertUser, type Shift, type InsertShift, type Achievement, type InsertAchievement, type PaySchedule, type InsertPaySchedule, type UpdatePaySchedule } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, desc, lt, gt, gte, lte, between } from "drizzle-orm";
 import session from "express-session";
@@ -25,6 +25,13 @@ export interface IStorage {
   getDailyPay(userId: number, date: string): Promise<{ total: number, hours: number }>;
   getWeeklyPay(userId: number, weekStart: string): Promise<{ total: number, hours: number, days: { date: string, pay: number, hours: number }[] }>;
   getMonthlyPay(userId: number, month: number, year: number): Promise<{ total: number, hours: number }>;
+  
+  // Pay schedule methods
+  getPaySchedules(userId: number): Promise<PaySchedule[]>;
+  getPayScheduleById(userId: number, scheduleId: number): Promise<PaySchedule | undefined>;
+  createPaySchedule(schedule: InsertPaySchedule): Promise<PaySchedule>;
+  updatePaySchedule(userId: number, scheduleId: number, scheduleData: UpdatePaySchedule): Promise<PaySchedule | undefined>;
+  deletePaySchedule(userId: number, scheduleId: number): Promise<boolean>;
   
   // Dashboard data
   getWeeklyData(userId: number): Promise<{ days: { date: string, hours: number, pay: number }[] }>;

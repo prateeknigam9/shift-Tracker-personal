@@ -23,6 +23,18 @@ export const shifts = pgTable("shifts", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
+export const pay_schedules = pgTable("pay_schedules", {
+  id: serial("id").primaryKey(),
+  user_id: integer("user_id").notNull().references(() => users.id),
+  pay_date: date("pay_date").notNull(),
+  period_start: date("period_start").notNull(),
+  period_end: date("period_end").notNull(),
+  amount: numeric("amount").notNull(),
+  status: text("status").notNull().default("pending"), // pending, paid, delayed
+  notes: text("notes"),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
 export const achievements = pgTable("achievements", {
   id: serial("id").primaryKey(),
   user_id: integer("user_id").notNull().references(() => users.id),
@@ -34,12 +46,20 @@ export const achievements = pgTable("achievements", {
 // Define relations
 export const usersRelations = relations(users, ({ many }) => ({
   shifts: many(shifts),
+  pay_schedules: many(pay_schedules),
   achievements: many(achievements),
 }));
 
 export const shiftsRelations = relations(shifts, ({ one }) => ({
   user: one(users, {
     fields: [shifts.user_id],
+    references: [users.id],
+  }),
+}));
+
+export const pay_schedulesRelations = relations(pay_schedules, ({ one }) => ({
+  user: one(users, {
+    fields: [pay_schedules.user_id],
     references: [users.id],
   }),
 }));
@@ -79,6 +99,35 @@ export const updateShiftSchema = z.object({
   hourly_rate: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   total_pay: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
 });
+export const insertPayScheduleSchema = createInsertSchema(pay_schedules).omit({ id: true, created_at: true })
+  .extend({
+    amount: z.union([z.string(), z.number()]).transform(val => String(val)),
+  });
+
+export const updatePayScheduleSchema = z.object({
+  pay_date: z.union([z.string(), z.date()]).transform(val => {
+    if (val instanceof Date) {
+      return val.toISOString().split('T')[0];
+    }
+    return val;
+  }).optional(),
+  period_start: z.union([z.string(), z.date()]).transform(val => {
+    if (val instanceof Date) {
+      return val.toISOString().split('T')[0];
+    }
+    return val;
+  }).optional(),
+  period_end: z.union([z.string(), z.date()]).transform(val => {
+    if (val instanceof Date) {
+      return val.toISOString().split('T')[0];
+    }
+    return val;
+  }).optional(),
+  amount: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  status: z.enum(["pending", "paid", "delayed"]).optional(),
+  notes: z.string().nullable().optional(),
+});
+
 export const insertAchievementSchema = createInsertSchema(achievements).omit({ id: true, unlocked_at: true });
 
 // Create validation schemas
@@ -113,6 +162,8 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Shift = typeof shifts.$inferSelect;
 export type InsertShift = typeof shifts.$inferInsert;
+export type PaySchedule = typeof pay_schedules.$inferSelect;
+export type InsertPaySchedule = typeof pay_schedules.$inferInsert;
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = typeof achievements.$inferInsert;
 
@@ -122,3 +173,4 @@ export type UserRegister = z.infer<typeof userRegisterSchema>;
 export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 export type UpdatePassword = z.infer<typeof updatePasswordSchema>;
 export type UpdateShift = z.infer<typeof updateShiftSchema>;
+export type UpdatePaySchedule = z.infer<typeof updatePayScheduleSchema>;

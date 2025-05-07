@@ -16,9 +16,9 @@ export function ProtectedRoute({
   // Force a check of authentication status
   useEffect(() => {
     if (!isLoading && !user && location !== "/auth") {
-      setLocation("/auth");
+      window.location.href = "/auth"; // Use direct navigation instead
     }
-  }, [user, isLoading, location, setLocation]);
+  }, [user, isLoading, location]);
 
   return (
     <Route path={path}>
@@ -27,7 +27,10 @@ export function ProtectedRoute({
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : !user ? (
-        <Redirect to="/auth" />
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          {/* Redirect handled via useEffect for better session handling */}
+        </div>
       ) : (
         children
       )}

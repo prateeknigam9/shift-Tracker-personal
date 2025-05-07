@@ -7,6 +7,7 @@ import dashboardRoutes from "./routes/dashboardRoutes";
 import profileRoutes from "./routes/profileRoutes";
 import backupRoutes from "./routes/backupRoutes";
 import achievementsRoutes from "./routes/achievementsRoutes";
+import analyticsRoutes from "./routes/analyticsRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes

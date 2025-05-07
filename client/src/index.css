@@ -89,12 +89,26 @@
 
 /* Progress bar animation */
 @keyframes progress {
-  0% { width: 0; }
-  100% { width: 100%; }
+  0% { 
+    width: 0; 
+    background-position: 0% 50%;
+  }
+  100% { 
+    width: 100%; 
+    background-position: 100% 50%;
+  }
 }
 
 .progress-animate {
   animation: progress 1.5s ease-in-out;
+  background-size: 200% auto;
+  background-image: linear-gradient(90deg, 
+    hsl(var(--primary) / 0.8) 0%, 
+    hsl(var(--secondary) / 0.8) 50%, 
+    hsl(var(--primary) / 0.8) 100%
+  );
+  transition: background 0.3s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Transitions and Animations */
@@ -236,9 +250,17 @@
 
 /* Glass Effect */
 .glass-effect {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-effect:hover {
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 /* Enhanced Animation Effects */
@@ -277,15 +299,16 @@
   animation: slideUp 0.5s ease-out forwards;
 }
 
+/* The progress animations are defined in two places
+   Using a different animation here for the enhanced version */
 .progress-animate {
-  animation: progressFill 1.5s ease-out forwards;
-}
-
-.card-hover {
-  transition: all 0.3s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: progressFill 1.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  background-size: 200% auto;
+  background-image: linear-gradient(90deg, 
+    hsl(var(--primary) / 0.8) 0%, 
+    hsl(var(--secondary) / 0.8) 50%, 
+    hsl(var(--primary) / 0.8) 100%
+  );
+  transition: background 0.3s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }

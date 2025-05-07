@@ -331,9 +331,9 @@ export default function PayTab() {
                 <span className="text-muted-foreground">Monthly Target</span>
                 <span className="font-medium">$1,500.00</span>
               </div>
-              <div className="h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-3 bg-muted/30 rounded-full overflow-hidden backdrop-blur-sm shadow-inner">
                 <div
-                  className="h-full bg-gradient-to-r from-primary to-secondary rounded-full progress-animate"
+                  className="h-full rounded-full progress-animate"
                   style={{ width: `${Math.min((selectedMonthData?.total || 0) / 1500 * 100, 100)}%` }}
                 ></div>
               </div>
@@ -493,11 +493,11 @@ export default function PayTab() {
                   const getStatusStyles = (status: string) => {
                     switch(status) {
                       case 'paid':
-                        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800/30';
+                        return 'bg-green-100/80 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800/30 shadow-sm shadow-green-100/40 dark:shadow-green-900/20';
                       case 'delayed':
-                        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800/30';
+                        return 'bg-red-100/80 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800/30 shadow-sm shadow-red-100/40 dark:shadow-red-900/20';
                       default:
-                        return 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800/30';
+                        return 'bg-amber-100/80 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800/30 shadow-sm shadow-amber-100/40 dark:shadow-amber-900/20';
                     }
                   };
                   
@@ -505,11 +505,11 @@ export default function PayTab() {
                   const getStatusIcon = (status: string) => {
                     switch(status) {
                       case 'paid':
-                        return <Calendar className="h-4 w-4 mr-1.5" />;
+                        return <CheckCircle className="h-4 w-4 mr-1.5" />;
                       case 'delayed':
-                        return <Calendar className="h-4 w-4 mr-1.5" />;
+                        return <AlertCircle className="h-4 w-4 mr-1.5" />;
                       default:
-                        return <Calendar className="h-4 w-4 mr-1.5" />;
+                        return <Clock className="h-4 w-4 mr-1.5" />;
                     }
                   };
                   
@@ -538,7 +538,7 @@ export default function PayTab() {
                       <div className="flex justify-between items-center">
                         <div>
                           <div className="flex items-center text-muted-foreground text-sm">
-                            <Calendar className="h-4 w-4 mr-1.5" />
+                            <CalendarDays className="h-4 w-4 mr-1.5" />
                             <span>Payment on {payDate.toLocaleDateString(undefined, {
                               weekday: 'short',
                               month: 'short',
@@ -546,12 +546,12 @@ export default function PayTab() {
                             })}</span>
                           </div>
                           <div className="flex items-center text-muted-foreground text-sm mt-1">
-                            <Calendar className="h-4 w-4 mr-1.5" />
+                            <Clock className="h-4 w-4 mr-1.5" />
                             <span>~{hours} hours worked</span>
                           </div>
                           {schedule.notes && (
                             <div className="flex items-start mt-2 text-sm text-muted-foreground">
-                              <Calendar className="h-4 w-4 mr-1.5 mt-0.5" />
+                              <StickyNote className="h-4 w-4 mr-1.5 mt-0.5" />
                               <span>{schedule.notes}</span>
                             </div>
                           )}

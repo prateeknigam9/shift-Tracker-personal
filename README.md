@@ -89,18 +89,22 @@ A comprehensive shift tracking mobile web application built with Node.js backend
    - `GROQ_API_KEY`: Your GROQ API key (if applicable)
    - `NODE_ENV`: Set to `production`
 
-### Step 5: Configure Database Migrations in Build Command
+### Step 5: Configure Build Command for Deployment
 
-To automatically run database migrations during deployment (without using Shell Scripts):
+To properly build the application and run database migrations on Render:
 
 1. In your web service settings, go back to the "Settings" tab
-2. Modify your Build Command to include database migrations:
+2. Set the following Build Command (includes fixing Vite dependency issue):
    ```bash
-   npm install && npm run build && npm run db:push
+   npm install && npm install @vitejs/plugin-react && npm run build && npm run db:push
    ```
 3. Click "Save Changes"
 
-This approach runs the database migrations automatically as part of the build process.
+This command:
+- Installs all dependencies from package.json
+- Explicitly installs @vitejs/plugin-react to fix a common Render build error
+- Builds your application
+- Runs database migrations automatically
 
 ### Step 6: Deploy Your Application
 
@@ -133,6 +137,7 @@ If you need to update environment variables after deployment:
 - **Migration Errors**: Check build logs for migration errors or manually run migrations by adding `npm run db:push` to your build command if it wasn't included initially
 - **Application Errors**: Check the Render logs from your web service dashboard for detailed error messages
 - **Table Not Found Errors**: These usually indicate the migrations didn't run successfully. Verify your build logs and ensure the DATABASE_URL is correctly set
+- **Vite Build Errors**: If you see errors like `Cannot find package '@vitejs/plugin-react'`, ensure you've included `npm install @vitejs/plugin-react` in your Build Command as shown in Step 5
 
 ## Custom Domain Setup (Optional)
 

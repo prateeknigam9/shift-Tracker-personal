@@ -229,8 +229,8 @@ export default function PayTab() {
   
   // Calculate month-over-month change
   let percentChange = 0;
-  if (prevMonthData?.total && monthData?.total) {
-    percentChange = ((monthData.total - prevMonthData.total) / prevMonthData.total) * 100;
+  if (prevMonthData?.total && selectedMonthData?.total) {
+    percentChange = ((selectedMonthData.total - prevMonthData.total) / prevMonthData.total) * 100;
   }
   
   // Get pay periods
@@ -261,12 +261,53 @@ export default function PayTab() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Card>
           <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">
-              This Month's Pay
-            </h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Monthly Pay
+              </h3>
+              <div className="flex space-x-1">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => handleChangeMonth(selectedMonth - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Select 
+                  value={selectedMonth.toString()} 
+                  onValueChange={(value) => setSelectedMonth(parseInt(value))}
+                >
+                  <SelectTrigger className="w-[110px]">
+                    <SelectValue placeholder="Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">January</SelectItem>
+                    <SelectItem value="2">February</SelectItem>
+                    <SelectItem value="3">March</SelectItem>
+                    <SelectItem value="4">April</SelectItem>
+                    <SelectItem value="5">May</SelectItem>
+                    <SelectItem value="6">June</SelectItem>
+                    <SelectItem value="7">July</SelectItem>
+                    <SelectItem value="8">August</SelectItem>
+                    <SelectItem value="9">September</SelectItem>
+                    <SelectItem value="10">October</SelectItem>
+                    <SelectItem value="11">November</SelectItem>
+                    <SelectItem value="12">December</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => handleChangeMonth(selectedMonth + 1)}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
             <div className="flex items-baseline">
               <span className="text-3xl font-medium">
-                ${monthData ? monthData.total.toFixed(2) : "0.00"}
+                ${selectedMonthData ? selectedMonthData.total.toFixed(2) : "0.00"}
               </span>
               {percentChange !== 0 && (
                 <span className={`text-sm ml-2 ${percentChange > 0 ? 'text-secondary' : 'text-destructive'}`}>
@@ -283,7 +324,7 @@ export default function PayTab() {
               <div className="h-2 bg-gray-200 rounded">
                 <div
                   className="h-2 bg-secondary rounded progress-animate"
-                  style={{ width: `${Math.min((monthData?.total || 0) / 1500 * 100, 100)}%` }}
+                  style={{ width: `${Math.min((selectedMonthData?.total || 0) / 1500 * 100, 100)}%` }}
                 ></div>
               </div>
             </div>
@@ -480,7 +521,26 @@ export default function PayTab() {
       {/* Yearly Pay Calendar */}
       <Card>
         <CardContent className="p-4">
-          <h2 className="text-lg font-medium mb-4">{year} Pay Calendar</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-medium">Pay Calendar</h2>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => handleChangeYear(selectedYear - 1)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="w-[80px] text-center font-medium">{selectedYear}</div>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => handleChangeYear(selectedYear + 1)}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {yearlyData?.months?.map((month: any) => {
@@ -488,13 +548,15 @@ export default function PayTab() {
                 "January", "February", "March", "April", "May", "June", 
                 "July", "August", "September", "October", "November", "December"
               ];
-              const isCurrentMonth = month.month === currentMonth;
+              const isCurrentMonth = month.month === selectedMonth;
               const isPastMonth = month.total > 0;
               
               return (
                 <div 
                   key={month.month} 
                   className={`border border-gray-200 rounded p-3 ${isCurrentMonth ? 'bg-primary-light bg-opacity-10' : isPastMonth ? '' : 'bg-gray-50'}`}
+                  onClick={() => setSelectedMonth(month.month)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <div className="font-medium mb-1">{monthNames[month.month - 1]}</div>
                   <div className="font-mono text-sm">

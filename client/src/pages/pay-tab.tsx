@@ -505,11 +505,11 @@ export default function PayTab() {
                   const getStatusIcon = (status: string) => {
                     switch(status) {
                       case 'paid':
-                        return <CheckCircle className="h-4 w-4 mr-1.5" />;
+                        return <Calendar className="h-4 w-4 mr-1.5" />;
                       case 'delayed':
-                        return <AlertCircle className="h-4 w-4 mr-1.5" />;
+                        return <Calendar className="h-4 w-4 mr-1.5" />;
                       default:
-                        return <Clock className="h-4 w-4 mr-1.5" />;
+                        return <Calendar className="h-4 w-4 mr-1.5" />;
                     }
                   };
                   
@@ -522,7 +522,7 @@ export default function PayTab() {
                     >
                       <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center">
-                          <CalendarDays className="h-4 w-4 text-muted-foreground mr-2" />
+                          <Calendar className="h-4 w-4 text-muted-foreground mr-2" />
                           <h3 className="font-medium">
                             <span className="font-mono">{startDate.toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span> - <span className="font-mono">{endDate.toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span>
                           </h3>
@@ -546,12 +546,12 @@ export default function PayTab() {
                             })}</span>
                           </div>
                           <div className="flex items-center text-muted-foreground text-sm mt-1">
-                            <Clock className="h-4 w-4 mr-1.5" />
+                            <Calendar className="h-4 w-4 mr-1.5" />
                             <span>~{hours} hours worked</span>
                           </div>
                           {schedule.notes && (
                             <div className="flex items-start mt-2 text-sm text-muted-foreground">
-                              <StickyNote className="h-4 w-4 mr-1.5 mt-0.5" />
+                              <Calendar className="h-4 w-4 mr-1.5 mt-0.5" />
                               <span>{schedule.notes}</span>
                             </div>
                           )}

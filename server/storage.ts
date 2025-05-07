@@ -398,6 +398,54 @@ export class DatabaseStorage implements IStorage {
     return nextShift;
   }
   
+  // Pay schedule methods
+  async getPaySchedules(userId: number): Promise<PaySchedule[]> {
+    return await db
+      .select()
+      .from(pay_schedules)
+      .where(eq(pay_schedules.user_id, userId))
+      .orderBy(desc(pay_schedules.pay_date));
+  }
+  
+  async getPayScheduleById(userId: number, scheduleId: number): Promise<PaySchedule | undefined> {
+    const [schedule] = await db
+      .select()
+      .from(pay_schedules)
+      .where(and(
+        eq(pay_schedules.id, scheduleId), 
+        eq(pay_schedules.user_id, userId)
+      ));
+    return schedule;
+  }
+  
+  async createPaySchedule(scheduleData: InsertPaySchedule): Promise<PaySchedule> {
+    const [schedule] = await db.insert(pay_schedules).values(scheduleData).returning();
+    return schedule;
+  }
+  
+  async updatePaySchedule(userId: number, scheduleId: number, scheduleData: UpdatePaySchedule): Promise<PaySchedule | undefined> {
+    const [updatedSchedule] = await db
+      .update(pay_schedules)
+      .set(scheduleData)
+      .where(and(
+        eq(pay_schedules.id, scheduleId), 
+        eq(pay_schedules.user_id, userId)
+      ))
+      .returning();
+    return updatedSchedule;
+  }
+  
+  async deletePaySchedule(userId: number, scheduleId: number): Promise<boolean> {
+    const result = await db
+      .delete(pay_schedules)
+      .where(and(
+        eq(pay_schedules.id, scheduleId), 
+        eq(pay_schedules.user_id, userId)
+      ))
+      .returning({ id: pay_schedules.id });
+    return result.length > 0;
+  }
+  
   // Achievements
   async getUserAchievements(userId: number): Promise<Achievement[]> {
     return await db

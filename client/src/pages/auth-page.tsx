@@ -137,9 +137,13 @@ export default function AuthPage() {
                           </span>
                           <FormControl>
                             <Input 
-                              {...field} 
+                              type="text"
                               placeholder="Enter your username" 
                               className="pl-9"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
                             />
                           </FormControl>
                         </div>
@@ -160,10 +164,13 @@ export default function AuthPage() {
                           </span>
                           <FormControl>
                             <Input 
-                              {...field} 
                               type="password" 
                               placeholder="Enter your password"
                               className="pl-9"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
                             />
                           </FormControl>
                         </div>
@@ -206,9 +213,18 @@ export default function AuthPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Enter your full name" />
-                        </FormControl>
+                        <div className="relative">
+                          <FormControl>
+                            <Input 
+                              type="text"
+                              placeholder="Enter your full name"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                            />
+                          </FormControl>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -226,9 +242,13 @@ export default function AuthPage() {
                           </span>
                           <FormControl>
                             <Input 
-                              {...field} 
+                              type="text"
                               placeholder="Choose a username" 
                               className="pl-9"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
                             />
                           </FormControl>
                         </div>
@@ -249,10 +269,13 @@ export default function AuthPage() {
                           </span>
                           <FormControl>
                             <Input 
-                              {...field} 
                               type="password" 
                               placeholder="Create a strong password"
                               className="pl-9"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
                             />
                           </FormControl>
                         </div>
@@ -273,10 +296,13 @@ export default function AuthPage() {
                           </span>
                           <FormControl>
                             <Input 
-                              {...field} 
                               type="password" 
                               placeholder="Confirm your password"
                               className="pl-9"
+                              value={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
                             />
                           </FormControl>
                         </div>

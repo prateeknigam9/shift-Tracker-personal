@@ -317,7 +317,7 @@ export default function PayTab() {
             
             <div className="flex items-baseline mt-4">
               <span className="text-4xl font-bold gradient-text">
-                ${selectedMonthData ? selectedMonthData.total.toFixed(2) : "0.00"}
+                €{selectedMonthData ? selectedMonthData.total.toFixed(2) : "0.00"}
               </span>
               {percentChange !== 0 && (
                 <span className={`text-sm ml-3 py-1 px-2 rounded-full ${percentChange > 0 ? 'bg-secondary/10 text-secondary' : 'bg-destructive/10 text-destructive'}`}>
@@ -329,7 +329,7 @@ export default function PayTab() {
             <div className="mt-5">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-muted-foreground">Monthly Target</span>
-                <span className="font-medium">$1,500.00</span>
+                <span className="font-medium">€1,500.00</span>
               </div>
               <div className="h-3 bg-muted/30 rounded-full overflow-hidden backdrop-blur-sm shadow-inner">
                 <div
@@ -385,7 +385,7 @@ export default function PayTab() {
                         </div>
                       </div>
                       <div className="flex gap-2 items-center">
-                        <div className="text-lg font-bold font-mono text-secondary">${Number(schedule.amount).toFixed(2)}</div>
+                        <div className="text-lg font-bold font-mono text-secondary">€{Number(schedule.amount).toFixed(2)}</div>
                         <Button 
                           variant="outline" 
                           size="icon"
@@ -421,7 +421,7 @@ export default function PayTab() {
                       </div>
                       <div className="flex gap-2 items-center">
                         <div className="text-lg font-bold font-mono">
-                          ${Number(schedule.amount).toFixed(2)} 
+                          €{Number(schedule.amount).toFixed(2)} 
                           <span className="text-xs text-muted-foreground">(est.)</span>
                         </div>
                         <Button 

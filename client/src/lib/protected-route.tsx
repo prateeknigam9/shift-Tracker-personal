@@ -3,13 +3,8 @@ import { Loader2 } from "lucide-react";
 import { useLocation, Redirect, Route } from "wouter";
 import { useEffect } from "react";
 
-export function ProtectedRoute({
-  path,
-  children,
-}: {
-  path: string;
-  children: React.ReactNode;
-}) {
+// Custom component for protection logic
+function ProtectionWrapper({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
   
@@ -20,20 +15,39 @@ export function ProtectedRoute({
     }
   }, [user, isLoading, location]);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        {/* Redirect handled via useEffect for better session handling */}
+      </div>
+    );
+  }
+  
+  return <>{children}</>;
+}
+
+// Main exported component
+export function ProtectedRoute({
+  path,
+  children,
+}: {
+  path: string;
+  children: React.ReactNode;
+}) {
   return (
     <Route path={path}>
-      {isLoading ? (
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : !user ? (
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          {/* Redirect handled via useEffect for better session handling */}
-        </div>
-      ) : (
-        children
-      )}
+      <ProtectionWrapper>
+        {children}
+      </ProtectionWrapper>
     </Route>
   );
 }

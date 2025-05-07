@@ -168,7 +168,7 @@ export default function AnalyticsTab() {
                       dataKey="value"
                       label={({ name, value }) => `${name}: ${value}`}
                     >
-                      {shiftTypes.map((entry, index) => (
+                      {shiftTypes.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -230,7 +230,7 @@ export default function AnalyticsTab() {
           </CardHeader>
           <CardContent>
             <div className="prose prose-slate max-w-none">
-              {insights.split('\n\n').map((paragraph, i) => (
+              {insights.split('\n\n').map((paragraph: string, i: number) => (
                 <React.Fragment key={i}>
                   <p>{paragraph}</p>
                   {i < insights.split('\n\n').length - 1 && <Separator className="my-2" />}

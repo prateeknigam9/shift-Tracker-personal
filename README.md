@@ -93,18 +93,24 @@ A comprehensive shift tracking mobile web application built with Node.js backend
 
 To properly build the application and run database migrations on Render:
 
-1. In your web service settings, go back to the "Settings" tab
-2. Set the following Build Command (includes fixing Vite dependency issue):
+1. Make sure the `deploy.sh` script is included in your repository and is executable
+2. In your web service settings, go back to the "Settings" tab
+3. Set the following Build Command (uses our custom deployment script):
    ```bash
-   npm install && npm install @vitejs/plugin-react && npm run build && npm run db:push
+   ./deploy.sh
    ```
-3. Click "Save Changes"
+4. Click "Save Changes"
 
-This command:
+The `deploy.sh` script:
+- Installs @vitejs/plugin-react first to prevent config loading errors
 - Installs all dependencies from package.json
-- Explicitly installs @vitejs/plugin-react to fix a common Render build error
 - Builds your application
 - Runs database migrations automatically
+
+**Note**: If you encounter permission issues with the script, try setting these additional build commands:
+```bash
+chmod +x deploy.sh && ./deploy.sh
+```
 
 ### Step 6: Deploy Your Application
 
@@ -137,7 +143,8 @@ If you need to update environment variables after deployment:
 - **Migration Errors**: Check build logs for migration errors or manually run migrations by adding `npm run db:push` to your build command if it wasn't included initially
 - **Application Errors**: Check the Render logs from your web service dashboard for detailed error messages
 - **Table Not Found Errors**: These usually indicate the migrations didn't run successfully. Verify your build logs and ensure the DATABASE_URL is correctly set
-- **Vite Build Errors**: If you see errors like `Cannot find package '@vitejs/plugin-react'`, ensure you've included `npm install @vitejs/plugin-react` in your Build Command as shown in Step 5
+- **Vite Build Errors**: If you see errors like `Cannot find package '@vitejs/plugin-react'`, make sure you're using the `deploy.sh` script which installs this dependency first before the Vite config is loaded
+- **Permission Denied Error**: If you see `Permission denied` for the deploy.sh script, use the alternative build command with chmod: `chmod +x deploy.sh && ./deploy.sh`
 
 ## Custom Domain Setup (Optional)
 

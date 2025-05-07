@@ -30,7 +30,6 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [isLoginView, setIsLoginView] = useState(true);
-  const [testInput, setTestInput] = useState("");
   const { user, loginMutation, registerMutation } = useAuth();
   const [_, navigate] = useLocation();
 

@@ -43,28 +43,15 @@ export const achievements = pgTable("achievements", {
   unlocked_at: timestamp("unlocked_at").defaultNow(),
 });
 
-export const wellness_metrics = pgTable("wellness_metrics", {
+export const sales_kpi = pgTable("sales_kpi", {
   id: serial("id").primaryKey(),
   user_id: integer("user_id").notNull().references(() => users.id),
-  date: date("date").notNull(),
-  work_hours: numeric("work_hours").notNull().default("0"),
-  overtime_hours: numeric("overtime_hours").notNull().default("0"),
-  stress_level: integer("stress_level").notNull().default(0), // 1-5 scale
-  rest_quality: integer("rest_quality").notNull().default(0), // 1-5 scale
-  work_satisfaction: integer("work_satisfaction").notNull().default(0), // 1-5 scale
-  balance_score: integer("balance_score").notNull().default(0), // 0-100 scale
-  notes: text("notes"),
-  created_at: timestamp("created_at").defaultNow(),
-});
-
-export const wellness_goals = pgTable("wellness_goals", {
-  id: serial("id").primaryKey(),
-  user_id: integer("user_id").notNull().references(() => users.id),
-  goal_type: text("goal_type").notNull(), // e.g., "max_weekly_hours", "min_rest_days", etc.
-  target_value: numeric("target_value").notNull(),
-  start_date: date("start_date").notNull(),
-  end_date: date("end_date"),
-  is_active: integer("is_active").notNull().default(1),
+  shift_id: integer("shift_id").notNull().references(() => shifts.id),
+  tech_insurance_sales: integer("tech_insurance_sales").notNull().default(0),
+  instant_insurance_sales: integer("instant_insurance_sales").notNull().default(0),
+  sky_tv_sales: integer("sky_tv_sales").notNull().default(0),
+  sky_broadband_sales: integer("sky_broadband_sales").notNull().default(0),
+  sky_streaming_sales: integer("sky_streaming_sales").notNull().default(0),
   notes: text("notes"),
   created_at: timestamp("created_at").defaultNow(),
 });
@@ -74,15 +61,15 @@ export const usersRelations = relations(users, ({ many }) => ({
   shifts: many(shifts),
   pay_schedules: many(pay_schedules),
   achievements: many(achievements),
-  wellness_metrics: many(wellness_metrics),
-  wellness_goals: many(wellness_goals),
+  sales_kpi: many(sales_kpi),
 }));
 
-export const shiftsRelations = relations(shifts, ({ one }) => ({
+export const shiftsRelations = relations(shifts, ({ one, many }) => ({
   user: one(users, {
     fields: [shifts.user_id],
     references: [users.id],
   }),
+  sales_kpi: many(sales_kpi),
 }));
 
 export const pay_schedulesRelations = relations(pay_schedules, ({ one }) => ({
@@ -99,17 +86,14 @@ export const achievementsRelations = relations(achievements, ({ one }) => ({
   }),
 }));
 
-export const wellness_metricsRelations = relations(wellness_metrics, ({ one }) => ({
+export const sales_kpiRelations = relations(sales_kpi, ({ one }) => ({
   user: one(users, {
-    fields: [wellness_metrics.user_id],
+    fields: [sales_kpi.user_id],
     references: [users.id],
   }),
-}));
-
-export const wellness_goalsRelations = relations(wellness_goals, ({ one }) => ({
-  user: one(users, {
-    fields: [wellness_goals.user_id],
-    references: [users.id],
+  shift: one(shifts, {
+    fields: [sales_kpi.shift_id],
+    references: [shifts.id],
   }),
 }));
 
@@ -172,49 +156,14 @@ export const updatePayScheduleSchema = z.object({
 
 export const insertAchievementSchema = createInsertSchema(achievements).omit({ id: true, unlocked_at: true });
 
-export const insertWellnessMetricSchema = createInsertSchema(wellness_metrics).omit({ id: true, created_at: true })
-  .extend({
-    work_hours: z.union([z.string(), z.number()]).transform(val => String(val)),
-    overtime_hours: z.union([z.string(), z.number()]).transform(val => String(val)),
-  });
+export const insertSalesKpiSchema = createInsertSchema(sales_kpi).omit({ id: true, created_at: true });
 
-export const updateWellnessMetricSchema = z.object({
-  date: z.union([z.string(), z.date()]).transform(val => {
-    if (val instanceof Date) {
-      return val.toISOString().split('T')[0];
-    }
-    return val;
-  }).optional(),
-  work_hours: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
-  overtime_hours: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
-  stress_level: z.number().min(0).max(5).optional(),
-  rest_quality: z.number().min(0).max(5).optional(),
-  work_satisfaction: z.number().min(0).max(5).optional(),
-  balance_score: z.number().min(0).max(100).optional(),
-  notes: z.string().nullable().optional(),
-});
-
-export const insertWellnessGoalSchema = createInsertSchema(wellness_goals).omit({ id: true, created_at: true })
-  .extend({
-    target_value: z.union([z.string(), z.number()]).transform(val => String(val)),
-  });
-
-export const updateWellnessGoalSchema = z.object({
-  goal_type: z.string().optional(),
-  target_value: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
-  start_date: z.union([z.string(), z.date()]).transform(val => {
-    if (val instanceof Date) {
-      return val.toISOString().split('T')[0];
-    }
-    return val;
-  }).optional(),
-  end_date: z.union([z.string(), z.date()]).transform(val => {
-    if (val instanceof Date) {
-      return val.toISOString().split('T')[0];
-    }
-    return val;
-  }).optional(),
-  is_active: z.number().min(0).max(1).optional(),
+export const updateSalesKpiSchema = z.object({
+  tech_insurance_sales: z.number().min(0).optional(),
+  instant_insurance_sales: z.number().min(0).optional(),
+  sky_tv_sales: z.number().min(0).optional(),
+  sky_broadband_sales: z.number().min(0).optional(),
+  sky_streaming_sales: z.number().min(0).optional(),
   notes: z.string().nullable().optional(),
 });
 
@@ -254,10 +203,8 @@ export type PaySchedule = typeof pay_schedules.$inferSelect;
 export type InsertPaySchedule = typeof pay_schedules.$inferInsert;
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = typeof achievements.$inferInsert;
-export type WellnessMetric = typeof wellness_metrics.$inferSelect;
-export type InsertWellnessMetric = typeof wellness_metrics.$inferInsert;
-export type WellnessGoal = typeof wellness_goals.$inferSelect;
-export type InsertWellnessGoal = typeof wellness_goals.$inferInsert;
+export type SalesKpi = typeof sales_kpi.$inferSelect;
+export type InsertSalesKpi = typeof sales_kpi.$inferInsert;
 
 // Additional validation types
 export type UserLogin = z.infer<typeof userLoginSchema>;
@@ -266,5 +213,4 @@ export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 export type UpdatePassword = z.infer<typeof updatePasswordSchema>;
 export type UpdateShift = z.infer<typeof updateShiftSchema>;
 export type UpdatePaySchedule = z.infer<typeof updatePayScheduleSchema>;
-export type UpdateWellnessMetric = z.infer<typeof updateWellnessMetricSchema>;
-export type UpdateWellnessGoal = z.infer<typeof updateWellnessGoalSchema>;
+export type UpdateSalesKpi = z.infer<typeof updateSalesKpiSchema>;

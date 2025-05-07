@@ -1,10 +1,9 @@
 import { 
-  users, shifts, achievements, pay_schedules, wellness_metrics, wellness_goals,
+  users, shifts, achievements, pay_schedules, sales_kpi,
   type User, type InsertUser, type Shift, type InsertShift, 
   type Achievement, type InsertAchievement, type PaySchedule, 
-  type InsertPaySchedule, type UpdatePaySchedule, type WellnessMetric,
-  type InsertWellnessMetric, type UpdateWellnessMetric, type WellnessGoal,
-  type InsertWellnessGoal, type UpdateWellnessGoal
+  type InsertPaySchedule, type UpdatePaySchedule, type SalesKpi,
+  type InsertSalesKpi, type UpdateSalesKpi
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, or, desc, lt, gt, gte, lte, between, isNull } from "drizzle-orm";
@@ -49,21 +48,13 @@ export interface IStorage {
   getUserAchievements(userId: number): Promise<Achievement[]>;
   addAchievement(achievement: InsertAchievement): Promise<Achievement>;
   
-  // Wellness Metrics methods
-  getWellnessMetrics(userId: number): Promise<WellnessMetric[]>;
-  getWellnessMetricById(userId: number, metricId: number): Promise<WellnessMetric | undefined>;
-  createWellnessMetric(metric: InsertWellnessMetric): Promise<WellnessMetric>;
-  updateWellnessMetric(userId: number, metricId: number, metricData: UpdateWellnessMetric): Promise<WellnessMetric | undefined>;
-  deleteWellnessMetric(userId: number, metricId: number): Promise<boolean>;
-  getRecentWellnessMetrics(userId: number, days: number): Promise<WellnessMetric[]>;
-  
-  // Wellness Goals methods
-  getWellnessGoals(userId: number): Promise<WellnessGoal[]>;
-  getWellnessGoalById(userId: number, goalId: number): Promise<WellnessGoal | undefined>;
-  createWellnessGoal(goal: InsertWellnessGoal): Promise<WellnessGoal>;
-  updateWellnessGoal(userId: number, goalId: number, goalData: UpdateWellnessGoal): Promise<WellnessGoal | undefined>;
-  deleteWellnessGoal(userId: number, goalId: number): Promise<boolean>;
-  getActiveWellnessGoals(userId: number): Promise<WellnessGoal[]>;
+  // Sales KPI methods
+  getSalesKpis(userId: number): Promise<SalesKpi[]>;
+  getSalesKpiById(userId: number, kpiId: number): Promise<SalesKpi | undefined>;
+  getSalesKpiByShiftId(userId: number, shiftId: number): Promise<SalesKpi | undefined>;
+  createSalesKpi(kpi: InsertSalesKpi): Promise<SalesKpi>;
+  updateSalesKpi(userId: number, kpiId: number, kpiData: UpdateSalesKpi): Promise<SalesKpi | undefined>;
+  deleteSalesKpi(userId: number, kpiId: number): Promise<boolean>;
   
   // Session store
   sessionStore: any;
@@ -451,7 +442,7 @@ export class DatabaseStorage implements IStorage {
       .update(pay_schedules)
       .set(scheduleData)
       .where(and(
-        eq(pay_schedules.id, scheduleId), 
+        eq(pay_schedules.id, scheduleId),
         eq(pay_schedules.user_id, userId)
       ))
       .returning();
@@ -462,7 +453,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(pay_schedules)
       .where(and(
-        eq(pay_schedules.id, scheduleId), 
+        eq(pay_schedules.id, scheduleId),
         eq(pay_schedules.user_id, userId)
       ))
       .returning({ id: pay_schedules.id });
@@ -479,147 +470,70 @@ export class DatabaseStorage implements IStorage {
   }
   
   async addAchievement(achievementData: InsertAchievement): Promise<Achievement> {
-    const [achievement] = await db
-      .insert(achievements)
-      .values(achievementData)
-      .returning();
-    
+    const [achievement] = await db.insert(achievements).values(achievementData).returning();
     return achievement;
   }
-
-  // Wellness Metrics methods
-  async getWellnessMetrics(userId: number): Promise<WellnessMetric[]> {
+  
+  // Sales KPI methods
+  async getSalesKpis(userId: number): Promise<SalesKpi[]> {
     return await db
       .select()
-      .from(wellness_metrics)
-      .where(eq(wellness_metrics.user_id, userId))
-      .orderBy(desc(wellness_metrics.date));
+      .from(sales_kpi)
+      .where(eq(sales_kpi.user_id, userId))
+      .orderBy(desc(sales_kpi.created_at));
   }
-
-  async getWellnessMetricById(userId: number, metricId: number): Promise<WellnessMetric | undefined> {
-    const [metric] = await db
+  
+  async getSalesKpiById(userId: number, kpiId: number): Promise<SalesKpi | undefined> {
+    const [kpi] = await db
       .select()
-      .from(wellness_metrics)
+      .from(sales_kpi)
       .where(and(
-        eq(wellness_metrics.id, metricId),
-        eq(wellness_metrics.user_id, userId)
+        eq(sales_kpi.id, kpiId),
+        eq(sales_kpi.user_id, userId)
       ));
-    return metric;
+    return kpi;
   }
-
-  async createWellnessMetric(metricData: InsertWellnessMetric): Promise<WellnessMetric> {
-    const [metric] = await db
-      .insert(wellness_metrics)
-      .values(metricData)
-      .returning();
-    return metric;
-  }
-
-  async updateWellnessMetric(userId: number, metricId: number, metricData: UpdateWellnessMetric): Promise<WellnessMetric | undefined> {
-    const [updatedMetric] = await db
-      .update(wellness_metrics)
-      .set(metricData)
+  
+  async getSalesKpiByShiftId(userId: number, shiftId: number): Promise<SalesKpi | undefined> {
+    const [kpi] = await db
+      .select()
+      .from(sales_kpi)
       .where(and(
-        eq(wellness_metrics.id, metricId),
-        eq(wellness_metrics.user_id, userId)
+        eq(sales_kpi.shift_id, shiftId),
+        eq(sales_kpi.user_id, userId)
+      ));
+    return kpi;
+  }
+  
+  async createSalesKpi(kpiData: InsertSalesKpi): Promise<SalesKpi> {
+    const [kpi] = await db
+      .insert(sales_kpi)
+      .values(kpiData)
+      .returning();
+    return kpi;
+  }
+  
+  async updateSalesKpi(userId: number, kpiId: number, kpiData: UpdateSalesKpi): Promise<SalesKpi | undefined> {
+    const [updatedKpi] = await db
+      .update(sales_kpi)
+      .set(kpiData)
+      .where(and(
+        eq(sales_kpi.id, kpiId),
+        eq(sales_kpi.user_id, userId)
       ))
       .returning();
-    return updatedMetric;
+    return updatedKpi;
   }
-
-  async deleteWellnessMetric(userId: number, metricId: number): Promise<boolean> {
+  
+  async deleteSalesKpi(userId: number, kpiId: number): Promise<boolean> {
     const result = await db
-      .delete(wellness_metrics)
+      .delete(sales_kpi)
       .where(and(
-        eq(wellness_metrics.id, metricId),
-        eq(wellness_metrics.user_id, userId)
+        eq(sales_kpi.id, kpiId),
+        eq(sales_kpi.user_id, userId)
       ))
-      .returning({ id: wellness_metrics.id });
+      .returning({ id: sales_kpi.id });
     return result.length > 0;
-  }
-
-  async getRecentWellnessMetrics(userId: number, days: number): Promise<WellnessMetric[]> {
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-    
-    return await db
-      .select()
-      .from(wellness_metrics)
-      .where(and(
-        eq(wellness_metrics.user_id, userId),
-        gte(wellness_metrics.date, startDate.toISOString().split('T')[0]),
-        lte(wellness_metrics.date, endDate.toISOString().split('T')[0])
-      ))
-      .orderBy(wellness_metrics.date);
-  }
-
-  // Wellness Goals methods
-  async getWellnessGoals(userId: number): Promise<WellnessGoal[]> {
-    return await db
-      .select()
-      .from(wellness_goals)
-      .where(eq(wellness_goals.user_id, userId))
-      .orderBy(desc(wellness_goals.created_at));
-  }
-
-  async getWellnessGoalById(userId: number, goalId: number): Promise<WellnessGoal | undefined> {
-    const [goal] = await db
-      .select()
-      .from(wellness_goals)
-      .where(and(
-        eq(wellness_goals.id, goalId),
-        eq(wellness_goals.user_id, userId)
-      ));
-    return goal;
-  }
-
-  async createWellnessGoal(goalData: InsertWellnessGoal): Promise<WellnessGoal> {
-    const [goal] = await db
-      .insert(wellness_goals)
-      .values(goalData)
-      .returning();
-    return goal;
-  }
-
-  async updateWellnessGoal(userId: number, goalId: number, goalData: UpdateWellnessGoal): Promise<WellnessGoal | undefined> {
-    const [updatedGoal] = await db
-      .update(wellness_goals)
-      .set(goalData)
-      .where(and(
-        eq(wellness_goals.id, goalId),
-        eq(wellness_goals.user_id, userId)
-      ))
-      .returning();
-    return updatedGoal;
-  }
-
-  async deleteWellnessGoal(userId: number, goalId: number): Promise<boolean> {
-    const result = await db
-      .delete(wellness_goals)
-      .where(and(
-        eq(wellness_goals.id, goalId),
-        eq(wellness_goals.user_id, userId)
-      ))
-      .returning({ id: wellness_goals.id });
-    return result.length > 0;
-  }
-
-  async getActiveWellnessGoals(userId: number): Promise<WellnessGoal[]> {
-    const today = new Date().toISOString().split('T')[0];
-    
-    return await db
-      .select()
-      .from(wellness_goals)
-      .where(and(
-        eq(wellness_goals.user_id, userId),
-        eq(wellness_goals.is_active, 1),
-        lte(wellness_goals.start_date, today),
-        or(
-          isNull(wellness_goals.end_date),
-          gte(wellness_goals.end_date, today)
-        )
-      ));
   }
 }
 

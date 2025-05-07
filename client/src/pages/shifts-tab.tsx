@@ -134,7 +134,7 @@ export default function ShiftsTab() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: `Failed to delete shift: ${error.message}`,
+        description: `Failed to delete shift: ${error.message || "Unknown error" || "Unknown error"}`,
         variant: "destructive",
       });
     },

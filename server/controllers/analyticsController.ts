@@ -68,7 +68,7 @@ export const getWeeklyAnalytics = async (req: Request, res: Response) => {
         timeframe: "weekly",
         data: dailyData
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating insights:", error);
       insights = "Unable to generate insights at this time.";
     }
@@ -86,7 +86,7 @@ export const getWeeklyAnalytics = async (req: Request, res: Response) => {
       shiftTypes: calculateShiftTypes(weeklyShifts),
       insights
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error getting weekly analytics:", error);
     res.status(500).json({ error: "Failed to get weekly analytics" });
   }
@@ -166,7 +166,7 @@ export const getMonthlyAnalytics = async (req: Request, res: Response) => {
         timeframe: "monthly",
         data: weeklyData
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating insights:", error);
       insights = "Unable to generate insights at this time.";
     }
@@ -184,7 +184,7 @@ export const getMonthlyAnalytics = async (req: Request, res: Response) => {
       shiftTypes: calculateShiftTypes(monthlyShifts),
       insights
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error getting monthly analytics:", error);
     res.status(500).json({ error: "Failed to get monthly analytics" });
   }
@@ -256,7 +256,7 @@ export const getYearlyAnalytics = async (req: Request, res: Response) => {
         timeframe: "yearly",
         data: monthlyData
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating insights:", error);
       insights = "Unable to generate insights at this time.";
     }
@@ -274,7 +274,7 @@ export const getYearlyAnalytics = async (req: Request, res: Response) => {
       shiftTypes: calculateShiftTypes(yearlyShifts),
       insights
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error getting yearly analytics:", error);
     res.status(500).json({ error: "Failed to get yearly analytics" });
   }

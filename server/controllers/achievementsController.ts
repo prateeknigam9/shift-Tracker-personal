@@ -10,7 +10,7 @@ export const getAchievements = async (req: Request, res: Response) => {
     
     const achievements = await storage.getUserAchievements(req.user.id);
     res.status(200).json(achievements);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching achievements:", error);
     res.status(500).json({ message: "Failed to fetch achievements" });
   }
@@ -94,7 +94,7 @@ export const checkAchievements = async (req: Request, res: Response) => {
       newAchievements,
       totalAchievements: existingAchievements.length + newAchievements.length
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error checking achievements:", error);
     res.status(500).json({ message: "Failed to check achievements" });
   }

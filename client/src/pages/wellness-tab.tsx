@@ -113,7 +113,7 @@ export default function WellnessTab() {
     onError: (error: Error) => {
       toast({
         title: "Failed to add wellness metric",
-        description: error.message,
+        description: error.message || "Unknown error",
         variant: "destructive",
       });
     },
@@ -148,7 +148,7 @@ export default function WellnessTab() {
     onError: (error: Error) => {
       toast({
         title: "Failed to add wellness goal",
-        description: error.message,
+        description: error.message || "Unknown error",
         variant: "destructive",
       });
     },

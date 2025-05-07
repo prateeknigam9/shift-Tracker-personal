@@ -129,7 +129,7 @@ export default function AdminPage() {
       const data = await response.json();
       setTables(data.map((t: any) => t.table_name));
       setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching tables:", error);
       toast({
         title: "Error",
@@ -147,7 +147,7 @@ export default function AdminPage() {
       const data = await response.json();
       setTableData(data);
       setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error fetching data from ${tableName}:`, error);
       toast({
         title: "Error",
@@ -191,11 +191,11 @@ export default function AdminPage() {
       
       setIsEditDialogOpen(false);
       setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating record:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to update record",
+        description: error.message || "Unknown error" || "Failed to update record",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -223,11 +223,11 @@ export default function AdminPage() {
       
       setIsDeleteDialogOpen(false);
       setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting record:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to delete record",
+        description: error.message || "Unknown error" || "Failed to delete record",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -267,12 +267,12 @@ export default function AdminPage() {
         title: "Success",
         description: `Query executed successfully (${data.rowCount} rows affected)`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error executing query:", error);
       setIsExecuting(false);
       toast({
         title: "Query Error",
-        description: error.message || "Failed to execute query",
+        description: error.message || "Unknown error" || "Failed to execute query",
         variant: "destructive",
       });
     }
@@ -306,12 +306,12 @@ export default function AdminPage() {
       }
       
       setIsMigrating(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error running migration:", error);
       setIsMigrating(false);
       toast({
         title: "Migration Error",
-        description: error.message || "Failed to run migration",
+        description: error.message || "Unknown error" || "Failed to run migration",
         variant: "destructive",
       });
     }

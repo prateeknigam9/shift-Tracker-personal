@@ -15,7 +15,7 @@ export const getSalesKpis = async (req: Request, res: Response) => {
 
     const kpis = await storage.getSalesKpis(userId);
     res.status(200).json(kpis);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching sales KPIs:", error);
     res.status(500).json({ message: "Failed to fetch sales KPIs" });
   }
@@ -33,7 +33,7 @@ export const getSalesKpiById = async (req: Request, res: Response) => {
     if (!kpi) return res.status(404).json({ message: "Sales KPI not found" });
 
     res.status(200).json(kpi);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching sales KPI:", error);
     res.status(500).json({ message: "Failed to fetch sales KPI" });
   }
@@ -58,7 +58,7 @@ export const getSalesKpiByShiftId = async (req: Request, res: Response) => {
       sky_broadband_sales: 0,
       sky_streaming_sales: 0
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching sales KPI for shift:", error);
     res.status(500).json({ message: "Failed to fetch sales KPI for shift" });
   }
@@ -86,7 +86,7 @@ export const createSalesKpi = async (req: Request, res: Response) => {
 
     const kpi = await storage.createSalesKpi(validatedData);
     res.status(201).json(kpi);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating sales KPI:", error);
     if (error instanceof ZodError) {
       return res.status(400).json({ message: "Invalid input data", errors: error.errors });
@@ -109,7 +109,7 @@ export const updateSalesKpi = async (req: Request, res: Response) => {
     if (!updatedKpi) return res.status(404).json({ message: "Sales KPI not found" });
 
     res.status(200).json(updatedKpi);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating sales KPI:", error);
     if (error instanceof ZodError) {
       return res.status(400).json({ message: "Invalid input data", errors: error.errors });
@@ -130,7 +130,7 @@ export const deleteSalesKpi = async (req: Request, res: Response) => {
     if (!success) return res.status(404).json({ message: "Sales KPI not found" });
 
     res.status(200).json({ message: "Sales KPI deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting sales KPI:", error);
     res.status(500).json({ message: "Failed to delete sales KPI" });
   }
@@ -283,7 +283,7 @@ export const getKpiSummary = async (req: Request, res: Response) => {
     };
     
     res.status(200).json(summary);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating KPI summary:", error);
     res.status(500).json({ message: "Failed to generate KPI summary" });
   }

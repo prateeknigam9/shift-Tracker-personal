@@ -17,7 +17,7 @@ export const getProfile = async (req: Request, res: Response) => {
       username: req.user.username,
       full_name: req.user.full_name
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching profile:", error);
     res.status(500).json({ message: "Failed to fetch profile" });
   }
@@ -44,7 +44,7 @@ export const updateProfile = async (req: Request, res: Response) => {
       username: updatedUser.username,
       full_name: updatedUser.full_name
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating profile:", error);
     
     if (error instanceof ZodError) {
@@ -87,7 +87,7 @@ export const updatePassword = async (req: Request, res: Response) => {
     }
     
     res.status(200).json({ message: "Password updated successfully" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating password:", error);
     
     if (error instanceof ZodError) {

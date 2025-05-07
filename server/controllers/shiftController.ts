@@ -13,7 +13,7 @@ export const getShifts = async (req: Request, res: Response) => {
     
     const shifts = await storage.getShifts(req.user.id);
     res.status(200).json(shifts);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching shifts:", error);
     res.status(500).json({ message: "Failed to fetch shifts" });
   }
@@ -37,7 +37,7 @@ export const getShiftById = async (req: Request, res: Response) => {
     }
     
     res.status(200).json(shift);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching shift:", error);
     res.status(500).json({ message: "Failed to fetch shift" });
   }
@@ -73,7 +73,7 @@ export const createShift = async (req: Request, res: Response) => {
     
     const shift = await storage.createShift(shiftData);
     res.status(201).json(shift);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating shift:", error);
     
     if (error instanceof ZodError) {
@@ -133,7 +133,7 @@ export const updateShift = async (req: Request, res: Response) => {
     }
     
     res.status(200).json(updatedShift);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating shift:", error);
     
     if (error instanceof ZodError) {
@@ -164,7 +164,7 @@ export const deleteShift = async (req: Request, res: Response) => {
     }
     
     res.status(200).json({ message: "Shift deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting shift:", error);
     res.status(500).json({ message: "Failed to delete shift" });
   }

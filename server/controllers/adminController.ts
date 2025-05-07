@@ -13,9 +13,9 @@ export const getTables = async (_req: Request, res: Response) => {
     `);
     
     res.status(200).json(tables.rows);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching tables:', error);
-    res.status(500).json({ message: 'Failed to fetch database tables' });
+    res.status(500).json({ message: `Failed to fetch database tables: ${error.message || 'Unknown error'}` });
   }
 };
 
@@ -44,9 +44,9 @@ export const getTableData = async (req: Request, res: Response) => {
       columns: columns.rows,
       data: data.rows
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error fetching data from ${req.params.tableName}:`, error);
-    res.status(500).json({ message: `Failed to fetch data from table: ${error.message}` });
+    res.status(500).json({ message: `Failed to fetch data from table: ${error.message || 'Unknown error'}` });
   }
 };
 
@@ -97,9 +97,9 @@ export const updateRecord = async (req: Request, res: Response) => {
     }
     
     res.status(200).json(result.rows[0]);
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error updating record in ${req.params.tableName}:`, error);
-    res.status(500).json({ message: `Failed to update record: ${error.message}` });
+    res.status(500).json({ message: `Failed to update record: ${error.message || 'Unknown error'}` });
   }
 };
 
@@ -128,9 +128,9 @@ export const deleteRecord = async (req: Request, res: Response) => {
     }
     
     res.status(200).json({ message: 'Record deleted successfully', id });
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error deleting record from ${req.params.tableName}:`, error);
-    res.status(500).json({ message: `Failed to delete record: ${error.message}` });
+    res.status(500).json({ message: `Failed to delete record: ${error.message || "Unknown error"}` });
   }
 };
 
@@ -159,9 +159,9 @@ export const executeQuery = async (req: Request, res: Response) => {
       rowCount: result.rowCount,
       rows: result.rows
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error executing custom query:', error);
-    res.status(500).json({ message: `Query error: ${error.message}` });
+    res.status(500).json({ message: `Query error: ${error.message || "Unknown error"}` });
   }
 };
 
@@ -178,8 +178,8 @@ export const runMigration = async (req: Request, res: Response) => {
     await db.execute(sql.raw(script));
     
     res.status(200).json({ message: 'Migration completed successfully' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error running migration:', error);
-    res.status(500).json({ message: `Migration failed: ${error.message}` });
+    res.status(500).json({ message: `Migration failed: ${error.message || "Unknown error"}` });
   }
 };

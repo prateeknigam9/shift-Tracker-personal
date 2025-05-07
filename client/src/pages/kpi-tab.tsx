@@ -110,7 +110,7 @@ export default function KpiTab() {
     onError: (error: Error) => {
       toast({
         title: "Failed to add KPI data",
-        description: error.message,
+        description: error.message || "Unknown error",
         variant: "destructive",
       });
     },
@@ -138,7 +138,7 @@ export default function KpiTab() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Unknown error",
         variant: "destructive",
       });
     }

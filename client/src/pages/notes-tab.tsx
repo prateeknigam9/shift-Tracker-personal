@@ -41,7 +41,7 @@ export default function NotesTab() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: `Failed to process note: ${error.message}`,
+        description: `Failed to process note: ${error.message || "Unknown error" || "Unknown error"}`,
         variant: "destructive",
       });
     },
@@ -64,7 +64,7 @@ export default function NotesTab() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: `Failed to save note: ${error.message}`,
+        description: `Failed to save note: ${error.message || "Unknown error" || "Unknown error"}`,
         variant: "destructive",
       });
     },

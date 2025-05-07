@@ -15,7 +15,7 @@ export const getDailyPay = async (req: Request, res: Response) => {
     
     const payData = await storage.getDailyPay(req.user.id, date);
     res.status(200).json(payData);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching daily pay:", error);
     res.status(500).json({ message: "Failed to fetch daily pay data" });
   }
@@ -35,7 +35,7 @@ export const getWeeklyPay = async (req: Request, res: Response) => {
     
     const payData = await storage.getWeeklyPay(req.user.id, weekStart);
     res.status(200).json(payData);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching weekly pay:", error);
     res.status(500).json({ message: "Failed to fetch weekly pay data" });
   }
@@ -56,7 +56,7 @@ export const getMonthlyPay = async (req: Request, res: Response) => {
     
     const payData = await storage.getMonthlyPay(req.user.id, month, year);
     res.status(200).json(payData);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching monthly pay:", error);
     res.status(500).json({ message: "Failed to fetch monthly pay data" });
   }
@@ -95,7 +95,7 @@ export const getYearlyPaySummary = async (req: Request, res: Response) => {
       totalHours,
       months: monthlyData
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching yearly pay summary:", error);
     res.status(500).json({ message: "Failed to fetch yearly pay summary" });
   }

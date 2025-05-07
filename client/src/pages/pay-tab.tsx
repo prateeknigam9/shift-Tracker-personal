@@ -93,7 +93,7 @@ export default function PayTab() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to create pay schedule",
+        description: error.message || "Unknown error" || "Failed to create pay schedule",
         variant: "destructive",
       });
     },
@@ -117,7 +117,7 @@ export default function PayTab() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to update pay schedule",
+        description: error.message || "Unknown error" || "Failed to update pay schedule",
         variant: "destructive",
       });
     },
@@ -138,7 +138,7 @@ export default function PayTab() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to delete pay schedule",
+        description: error.message || "Unknown error" || "Failed to delete pay schedule",
         variant: "destructive",
       });
     },

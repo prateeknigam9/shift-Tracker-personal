@@ -31,7 +31,7 @@ export const exportShifts = async (req: Request, res: Response) => {
     
     // Send CSV file
     res.status(200).send(csvBuffer);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error exporting shifts:", error);
     res.status(500).json({ message: "Failed to export shifts" });
   }
@@ -74,7 +74,7 @@ export const importShifts = async (req: Request, res: Response) => {
         try {
           const shift = await storage.createShift(shiftData as any);
           importedShifts.push(shift);
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error importing shift:", error);
           errors.push(`Failed to import shift: ${(error as Error).message}`);
         }
@@ -86,7 +86,7 @@ export const importShifts = async (req: Request, res: Response) => {
         imported: importedShifts.length,
         errors: errors.length > 0 ? errors : undefined
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error importing shifts:", error);
       res.status(500).json({ message: "Failed to import shifts" });
     }

@@ -72,7 +72,7 @@ export const getDashboardData = async (req: Request, res: Response) => {
         nextShift: nextShiftData
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching dashboard data:", error);
     res.status(500).json({ message: "Failed to fetch dashboard data" });
   }
@@ -91,7 +91,7 @@ export const getDashboardSummary = async (req: Request, res: Response) => {
     const summary = await groqService.generateDashboardSummary(shifts);
     
     res.status(200).json({ summary });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating dashboard summary:", error);
     res.status(500).json({ message: "Failed to generate dashboard summary" });
   }
@@ -113,7 +113,7 @@ export const processNotes = async (req: Request, res: Response) => {
     const processedNotes = await groqService.processNotes(notes);
     
     res.status(200).json({ processedNotes });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error processing notes:", error);
     res.status(500).json({ message: "Failed to process notes" });
   }

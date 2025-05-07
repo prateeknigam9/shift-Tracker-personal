@@ -18,7 +18,7 @@ export const getWellnessMetrics = async (req: Request, res: Response) => {
 
     const metrics = await storage.getWellnessMetrics(userId);
     res.status(200).json(metrics);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching wellness metrics:", error);
     res.status(500).json({ message: "Failed to fetch wellness metrics" });
   }
@@ -36,7 +36,7 @@ export const getWellnessMetricById = async (req: Request, res: Response) => {
     if (!metric) return res.status(404).json({ message: "Wellness metric not found" });
 
     res.status(200).json(metric);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching wellness metric:", error);
     res.status(500).json({ message: "Failed to fetch wellness metric" });
   }
@@ -54,7 +54,7 @@ export const createWellnessMetric = async (req: Request, res: Response) => {
 
     const metric = await storage.createWellnessMetric(validatedData);
     res.status(201).json(metric);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating wellness metric:", error);
     if (error instanceof ZodError) {
       return res.status(400).json({ message: "Invalid input data", errors: error.errors });
@@ -77,7 +77,7 @@ export const updateWellnessMetric = async (req: Request, res: Response) => {
     if (!updatedMetric) return res.status(404).json({ message: "Wellness metric not found" });
 
     res.status(200).json(updatedMetric);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating wellness metric:", error);
     if (error instanceof ZodError) {
       return res.status(400).json({ message: "Invalid input data", errors: error.errors });
@@ -98,7 +98,7 @@ export const deleteWellnessMetric = async (req: Request, res: Response) => {
     if (!success) return res.status(404).json({ message: "Wellness metric not found" });
 
     res.status(200).json({ message: "Wellness metric deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting wellness metric:", error);
     res.status(500).json({ message: "Failed to delete wellness metric" });
   }
@@ -112,7 +112,7 @@ export const getWellnessGoals = async (req: Request, res: Response) => {
 
     const goals = await storage.getWellnessGoals(userId);
     res.status(200).json(goals);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching wellness goals:", error);
     res.status(500).json({ message: "Failed to fetch wellness goals" });
   }
@@ -130,7 +130,7 @@ export const getWellnessGoalById = async (req: Request, res: Response) => {
     if (!goal) return res.status(404).json({ message: "Wellness goal not found" });
 
     res.status(200).json(goal);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching wellness goal:", error);
     res.status(500).json({ message: "Failed to fetch wellness goal" });
   }
@@ -148,7 +148,7 @@ export const createWellnessGoal = async (req: Request, res: Response) => {
 
     const goal = await storage.createWellnessGoal(validatedData);
     res.status(201).json(goal);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating wellness goal:", error);
     if (error instanceof ZodError) {
       return res.status(400).json({ message: "Invalid input data", errors: error.errors });
@@ -171,7 +171,7 @@ export const updateWellnessGoal = async (req: Request, res: Response) => {
     if (!updatedGoal) return res.status(404).json({ message: "Wellness goal not found" });
 
     res.status(200).json(updatedGoal);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating wellness goal:", error);
     if (error instanceof ZodError) {
       return res.status(400).json({ message: "Invalid input data", errors: error.errors });
@@ -192,7 +192,7 @@ export const deleteWellnessGoal = async (req: Request, res: Response) => {
     if (!success) return res.status(404).json({ message: "Wellness goal not found" });
 
     res.status(200).json({ message: "Wellness goal deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting wellness goal:", error);
     res.status(500).json({ message: "Failed to delete wellness goal" });
   }
@@ -360,7 +360,7 @@ export const getWellnessSummary = async (req: Request, res: Response) => {
     };
     
     res.status(200).json(summary);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating wellness summary:", error);
     res.status(500).json({ message: "Failed to generate wellness summary" });
   }

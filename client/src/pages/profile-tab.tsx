@@ -85,7 +85,7 @@ export default function ProfileTab() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: `Failed to update profile: ${error.message}`,
+        description: `Failed to update profile: ${error.message || "Unknown error" || "Unknown error"}`,
         variant: "destructive",
       });
     },
@@ -107,7 +107,7 @@ export default function ProfileTab() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: `Failed to update password: ${error.message}`,
+        description: `Failed to update password: ${error.message || "Unknown error" || "Unknown error"}`,
         variant: "destructive",
       });
     },
@@ -157,7 +157,7 @@ export default function ProfileTab() {
     onError: (error: Error) => {
       toast({
         title: "Import failed",
-        description: error.message,
+        description: error.message || "Unknown error",
         variant: "destructive",
       });
     },

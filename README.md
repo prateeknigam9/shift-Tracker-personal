@@ -104,8 +104,13 @@ To properly build the application and run database migrations on Render:
 The `deploy.sh` script:
 - Installs @vitejs/plugin-react first to prevent config loading errors
 - Installs all dependencies from package.json
-- Builds your application
+- Creates and runs a Node.js workaround script that:
+  - Copies the Vite plugin to a temporary location
+  - Sets up NODE_PATH to ensure the module is found
+  - Runs the build process with the correct environment
 - Runs database migrations automatically
+
+This advanced workaround solution handles the common Vite module resolution problems on Render deployment.
 
 **Note**: If you encounter permission issues with the script, try setting these additional build commands:
 ```bash
@@ -143,7 +148,10 @@ If you need to update environment variables after deployment:
 - **Migration Errors**: Check build logs for migration errors or manually run migrations by adding `npm run db:push` to your build command if it wasn't included initially
 - **Application Errors**: Check the Render logs from your web service dashboard for detailed error messages
 - **Table Not Found Errors**: These usually indicate the migrations didn't run successfully. Verify your build logs and ensure the DATABASE_URL is correctly set
-- **Vite Build Errors**: If you see errors like `Cannot find package '@vitejs/plugin-react'`, make sure you're using the `deploy.sh` script which installs this dependency first before the Vite config is loaded
+- **Vite Build Errors**: If you still see errors like `Cannot find package '@vitejs/plugin-react'` even after using the deploy.sh script, you can try these additional steps:
+  1. Check that the script has execute permissions with `chmod +x deploy.sh`
+  2. Verify in the build logs that the workaround script is executing by looking for "Creating build script workaround..." and "Copying plugin to temporary location..." messages
+  3. If needed, contact Render support mentioning the specific Node module resolution issue
 - **Permission Denied Error**: If you see `Permission denied` for the deploy.sh script, use the alternative build command with chmod: `chmod +x deploy.sh && ./deploy.sh`
 
 ## Custom Domain Setup (Optional)

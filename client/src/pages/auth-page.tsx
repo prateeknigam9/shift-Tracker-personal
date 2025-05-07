@@ -66,6 +66,43 @@ export default function AuthPage() {
     registerMutation.mutate(registerData);
   };
 
+  // Simpler direct state management for register form
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  
+  const handleRegisterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (fullName.length < 2) {
+      alert("Full name must be at least 2 characters");
+      return;
+    }
+    
+    if (username.length < 3) {
+      alert("Username must be at least 3 characters");
+      return;
+    }
+    
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    
+    registerMutation.mutate({
+      full_name: fullName,
+      username,
+      password
+    });
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 login-bg">
       <div className="grid md:grid-cols-2 gap-8 w-full max-w-4xl">
@@ -137,13 +174,9 @@ export default function AuthPage() {
                           </span>
                           <FormControl>
                             <Input 
-                              type="text"
+                              {...field} 
                               placeholder="Enter your username" 
                               className="pl-9"
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
                             />
                           </FormControl>
                         </div>
@@ -164,13 +197,10 @@ export default function AuthPage() {
                           </span>
                           <FormControl>
                             <Input 
+                              {...field} 
                               type="password" 
                               placeholder="Enter your password"
                               className="pl-9"
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
                             />
                           </FormControl>
                         </div>
@@ -205,137 +235,93 @@ export default function AuthPage() {
                 </form>
               </Form>
             ) : (
-              <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                  <FormField
-                    control={registerForm.control}
-                    name="full_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <div className="relative">
-                          <FormControl>
-                            <Input 
-                              type="text"
-                              placeholder="Enter your full name"
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+              <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <FormLabel htmlFor="full_name">Full Name</FormLabel>
+                  <Input
+                    id="full_name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                   />
-                  
-                  <FormField
-                    control={registerForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-muted-foreground">
-                            <User className="h-4 w-4" />
-                          </span>
-                          <FormControl>
-                            <Input 
-                              type="text"
-                              placeholder="Choose a username" 
-                              className="pl-9"
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={registerForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-muted-foreground">
-                            <Lock className="h-4 w-4" />
-                          </span>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Create a strong password"
-                              className="pl-9"
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={registerForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-muted-foreground">
-                            <Lock className="h-4 w-4" />
-                          </span>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder="Confirm your password"
-                              className="pl-9"
-                              value={field.value}
-                              onChange={field.onChange}
-                              onBlur={field.onBlur}
-                              name={field.name}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full login-button btn-shine rounded-lg"
-                    disabled={registerMutation.isPending}
-                  >
-                    {registerMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating Account...
-                      </>
-                    ) : "Create Account"}
-                  </Button>
-                  
-                  <div className="text-center text-sm text-muted-foreground">
-                    Already have an account?{" "}
-                    <button
-                      type="button"
-                      className="text-primary hover:text-primary/80 font-medium transition-colors"
-                      onClick={() => setIsLoginView(true)}
-                    >
-                      Sign in
-                    </button>
+                </div>
+                
+                <div className="space-y-2">
+                  <FormLabel htmlFor="username">Username</FormLabel>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-muted-foreground">
+                      <User className="h-4 w-4" />
+                    </span>
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="Choose a username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="pl-9"
+                    />
                   </div>
-                </form>
-              </Form>
+                </div>
+                
+                <div className="space-y-2">
+                  <FormLabel htmlFor="password">Password</FormLabel>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-muted-foreground">
+                      <Lock className="h-4 w-4" />
+                    </span>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Create a strong password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-muted-foreground">
+                      <Lock className="h-4 w-4" />
+                    </span>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full login-button btn-shine rounded-lg"
+                  disabled={registerMutation.isPending}
+                >
+                  {registerMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : "Create Account"}
+                </Button>
+                
+                <div className="text-center text-sm text-muted-foreground">
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    className="text-primary hover:text-primary/80 font-medium transition-colors"
+                    onClick={() => setIsLoginView(true)}
+                  >
+                    Sign in
+                  </button>
+                </div>
+              </form>
             )}
           </CardContent>
         </Card>

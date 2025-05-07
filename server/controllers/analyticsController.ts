@@ -4,6 +4,9 @@ import { groqService } from "../services/groqService";
 
 export const getWeeklyAnalytics = async (req: Request, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     const userId = req.user.id;
     
     // Get all shifts for the user
@@ -30,11 +33,11 @@ export const getWeeklyAnalytics = async (req: Request, res: Response) => {
       const totalHours = dayShifts.reduce((acc, shift) => {
         const startTime = new Date(`2000-01-01T${shift.start_time}`);
         const endTime = new Date(`2000-01-01T${shift.end_time}`);
-        const breakDuration = shift.break_duration || 0;
+        const breakTime = parseFloat(shift.break_time.toString()) || 0;
         
         // Calculate hours worked
         let hoursWorked = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-        hoursWorked -= breakDuration / 60; // Convert break minutes to hours
+        hoursWorked -= breakTime; // Break time is already in hours
         
         return acc + hoursWorked;
       }, 0);
@@ -42,13 +45,13 @@ export const getWeeklyAnalytics = async (req: Request, res: Response) => {
       const totalEarnings = dayShifts.reduce((acc, shift) => {
         const startTime = new Date(`2000-01-01T${shift.start_time}`);
         const endTime = new Date(`2000-01-01T${shift.end_time}`);
-        const breakDuration = shift.break_duration || 0;
+        const breakTime = parseFloat(shift.break_time.toString()) || 0;
         
         // Calculate hours worked
         let hoursWorked = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-        hoursWorked -= breakDuration / 60; // Convert break minutes to hours
+        hoursWorked -= breakTime; // Break time is already in hours
         
-        return acc + (hoursWorked * (shift.hourly_rate || 0));
+        return acc + (hoursWorked * parseFloat(shift.hourly_rate.toString() || '0'));
       }, 0);
       
       return {
@@ -91,6 +94,9 @@ export const getWeeklyAnalytics = async (req: Request, res: Response) => {
 
 export const getMonthlyAnalytics = async (req: Request, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     const userId = req.user.id;
     
     // Get all shifts for the user
@@ -125,11 +131,11 @@ export const getMonthlyAnalytics = async (req: Request, res: Response) => {
       const totalHours = weekShifts.reduce((acc, shift) => {
         const startTime = new Date(`2000-01-01T${shift.start_time}`);
         const endTime = new Date(`2000-01-01T${shift.end_time}`);
-        const breakDuration = shift.break_duration || 0;
+        const breakTime = parseFloat(shift.break_time.toString()) || 0;
         
         // Calculate hours worked
         let hoursWorked = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-        hoursWorked -= breakDuration / 60; // Convert break minutes to hours
+        hoursWorked -= breakTime; // Break time is already in hours
         
         return acc + hoursWorked;
       }, 0);
@@ -137,13 +143,13 @@ export const getMonthlyAnalytics = async (req: Request, res: Response) => {
       const totalEarnings = weekShifts.reduce((acc, shift) => {
         const startTime = new Date(`2000-01-01T${shift.start_time}`);
         const endTime = new Date(`2000-01-01T${shift.end_time}`);
-        const breakDuration = shift.break_duration || 0;
+        const breakTime = parseFloat(shift.break_time.toString()) || 0;
         
         // Calculate hours worked
         let hoursWorked = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-        hoursWorked -= breakDuration / 60; // Convert break minutes to hours
+        hoursWorked -= breakTime; // Break time is already in hours
         
-        return acc + (hoursWorked * (shift.hourly_rate || 0));
+        return acc + (hoursWorked * parseFloat(shift.hourly_rate.toString() || '0'));
       }, 0);
       
       weeklyData.push({
@@ -186,6 +192,9 @@ export const getMonthlyAnalytics = async (req: Request, res: Response) => {
 
 export const getYearlyAnalytics = async (req: Request, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
     const userId = req.user.id;
     
     // Get all shifts for the user
@@ -212,11 +221,11 @@ export const getYearlyAnalytics = async (req: Request, res: Response) => {
       const totalHours = monthShifts.reduce((acc, shift) => {
         const startTime = new Date(`2000-01-01T${shift.start_time}`);
         const endTime = new Date(`2000-01-01T${shift.end_time}`);
-        const breakDuration = shift.break_duration || 0;
+        const breakTime = parseFloat(shift.break_time.toString()) || 0;
         
         // Calculate hours worked
         let hoursWorked = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-        hoursWorked -= breakDuration / 60; // Convert break minutes to hours
+        hoursWorked -= breakTime; // Break time is already in hours
         
         return acc + hoursWorked;
       }, 0);
@@ -224,13 +233,13 @@ export const getYearlyAnalytics = async (req: Request, res: Response) => {
       const totalEarnings = monthShifts.reduce((acc, shift) => {
         const startTime = new Date(`2000-01-01T${shift.start_time}`);
         const endTime = new Date(`2000-01-01T${shift.end_time}`);
-        const breakDuration = shift.break_duration || 0;
+        const breakTime = parseFloat(shift.break_time.toString()) || 0;
         
         // Calculate hours worked
         let hoursWorked = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-        hoursWorked -= breakDuration / 60; // Convert break minutes to hours
+        hoursWorked -= breakTime; // Break time is already in hours
         
-        return acc + (hoursWorked * (shift.hourly_rate || 0));
+        return acc + (hoursWorked * parseFloat(shift.hourly_rate.toString() || '0'));
       }, 0);
       
       return {

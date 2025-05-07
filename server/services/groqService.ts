@@ -9,7 +9,7 @@ interface GroqServiceInterface {
 }
 
 class GroqService implements GroqServiceInterface {
-  private apiKey: string;
+  private apiKey: string | undefined;
   private baseUrl: string = "https://api.groq.com/openai/v1";
 
   constructor() {
@@ -62,8 +62,7 @@ class GroqService implements GroqServiceInterface {
       start_time: shift.start_time,
       end_time: shift.end_time,
       hourly_rate: shift.hourly_rate,
-      break_duration: shift.break_duration,
-      location: shift.location,
+      break_time: shift.break_time,
       notes: shift.notes
     })));
 

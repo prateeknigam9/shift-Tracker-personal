@@ -20,6 +20,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/profile", profileRoutes);
   app.use("/api/backup", backupRoutes);
   app.use("/api/achievements", achievementsRoutes);
+  app.use("/api/analytics", analyticsRoutes);
   
   const httpServer = createServer(app);
   

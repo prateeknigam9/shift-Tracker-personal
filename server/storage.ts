@@ -7,7 +7,7 @@ import {
   type InsertWellnessGoal, type UpdateWellnessGoal
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, and, desc, lt, gt, gte, lte, between } from "drizzle-orm";
+import { eq, and, or, desc, lt, gt, gte, lte, between, isNull } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 
@@ -616,7 +616,7 @@ export class DatabaseStorage implements IStorage {
         eq(wellness_goals.is_active, 1),
         lte(wellness_goals.start_date, today),
         or(
-          eq(wellness_goals.end_date, null),
+          isNull(wellness_goals.end_date),
           gte(wellness_goals.end_date, today)
         )
       ));

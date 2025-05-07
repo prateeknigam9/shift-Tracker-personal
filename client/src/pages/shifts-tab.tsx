@@ -295,14 +295,14 @@ export default function ShiftsTab() {
                 </div>
                 <div 
                   className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center mb-1",
-                    day.isToday ? "border-2 border-primary font-semibold" : "",
-                    day.hasShift ? "bg-green-100 dark:bg-green-900" : ""
+                    "w-12 h-12 rounded-full flex items-center justify-center mb-1 schedule-day",
+                    day.isToday ? "schedule-day-today" : "",
+                    day.hasShift ? "schedule-day-active" : ""
                   )}
                 >
                   <span className={cn(
                     "text-lg",
-                    day.hasShift ? "text-green-800 dark:text-green-200" : ""
+                    day.hasShift ? "text-secondary-foreground dark:text-green-200" : ""
                   )}>
                     {day.dayNumber}
                   </span>

@@ -259,16 +259,22 @@ export default function PayTab() {
     <section className="space-y-6">
       {/* Pay Period Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Monthly Pay
-              </h3>
+        <Card className="card-hover overflow-hidden border-t-4 border-t-primary animate-fade-in">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 rounded-full bg-primary/10">
+                  <Calendar className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-base font-medium">
+                  Monthly Pay
+                </h3>
+              </div>
               <div className="flex space-x-1">
                 <Button 
                   variant="outline" 
                   size="icon" 
+                  className="rounded-full"
                   onClick={() => handleChangeMonth(selectedMonth - 1)}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -277,7 +283,7 @@ export default function PayTab() {
                   value={selectedMonth.toString()} 
                   onValueChange={(value) => setSelectedMonth(parseInt(value))}
                 >
-                  <SelectTrigger className="w-[110px]">
+                  <SelectTrigger className="w-[120px] rounded-lg">
                     <SelectValue placeholder="Month" />
                   </SelectTrigger>
                   <SelectContent>
@@ -297,7 +303,8 @@ export default function PayTab() {
                 </Select>
                 <Button 
                   variant="outline" 
-                  size="icon" 
+                  size="icon"
+                  className="rounded-full" 
                   onClick={() => handleChangeMonth(selectedMonth + 1)}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -305,25 +312,25 @@ export default function PayTab() {
               </div>
             </div>
             
-            <div className="flex items-baseline">
-              <span className="text-3xl font-medium">
+            <div className="flex items-baseline mt-4">
+              <span className="text-4xl font-bold gradient-text">
                 ${selectedMonthData ? selectedMonthData.total.toFixed(2) : "0.00"}
               </span>
               {percentChange !== 0 && (
-                <span className={`text-sm ml-2 ${percentChange > 0 ? 'text-secondary' : 'text-destructive'}`}>
-                  {percentChange > 0 ? "+" : ""}{percentChange.toFixed(1)}% from last month
+                <span className={`text-sm ml-3 py-1 px-2 rounded-full ${percentChange > 0 ? 'bg-secondary/10 text-secondary' : 'bg-destructive/10 text-destructive'}`}>
+                  {percentChange > 0 ? "↑" : "↓"}{Math.abs(percentChange).toFixed(1)}%
                 </span>
               )}
             </div>
             
-            <div className="mt-4">
-              <div className="flex justify-between text-sm mb-1">
+            <div className="mt-5">
+              <div className="flex justify-between text-sm mb-2">
                 <span className="text-muted-foreground">Monthly Target</span>
                 <span className="font-medium">$1,500.00</span>
               </div>
-              <div className="h-2 bg-gray-200 rounded">
+              <div className="h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
-                  className="h-2 bg-secondary rounded progress-animate"
+                  className="h-full bg-gradient-to-r from-primary to-secondary rounded-full progress-animate"
                   style={{ width: `${Math.min((selectedMonthData?.total || 0) / 1500 * 100, 100)}%` }}
                 ></div>
               </div>
@@ -331,14 +338,19 @@ export default function PayTab() {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4">
+        <Card className="card-hover overflow-hidden border-t-4 border-t-secondary animate-fade-in">
+          <CardContent className="p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-sm font-medium text-muted-foreground">Pay Schedule</h3>
+              <div className="flex items-center space-x-2">
+                <div className="p-2 rounded-full bg-secondary/10">
+                  <Calendar className="h-5 w-5 text-secondary" />
+                </div>
+                <h3 className="text-base font-medium">Pay Schedule</h3>
+              </div>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 rounded-lg btn-shine"
                 onClick={handleAddPaySchedule}
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -347,25 +359,34 @@ export default function PayTab() {
             </div>
             
             {paySchedules && paySchedules.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {/* Display last paid schedule */}
                 {paySchedules
                   .filter(s => s.status === 'paid')
                   .sort((a, b) => new Date(b.pay_date as string).getTime() - new Date(a.pay_date as string).getTime())
                   .slice(0, 1)
                   .map(schedule => (
-                    <div key={schedule.id} className="flex justify-between items-center">
+                    <div key={schedule.id} className="flex justify-between items-center bg-muted/30 p-3 rounded-lg animate-slide-up">
                       <div>
-                        <div className="font-medium">Last Pay Date</div>
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(schedule.pay_date as string).toLocaleDateString()}
+                        <div className="font-medium flex items-center space-x-1">
+                          <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>
+                          <span>Last Received</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {new Date(schedule.pay_date as string).toLocaleDateString(undefined, {
+                            weekday: 'short',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
                         </div>
                       </div>
                       <div className="flex gap-2 items-center">
-                        <div className="text-lg font-medium font-mono">${Number(schedule.amount).toFixed(2)}</div>
+                        <div className="text-lg font-bold font-mono text-secondary">${Number(schedule.amount).toFixed(2)}</div>
                         <Button 
-                          variant="ghost" 
+                          variant="outline" 
                           size="icon"
+                          className="rounded-full"
                           onClick={() => handleEditPaySchedule(schedule)}
                         >
                           <Edit className="h-4 w-4" />
@@ -380,21 +401,30 @@ export default function PayTab() {
                   .sort((a, b) => new Date(a.pay_date as string).getTime() - new Date(b.pay_date as string).getTime())
                   .slice(0, 1)
                   .map(schedule => (
-                    <div key={schedule.id} className="flex justify-between items-center">
+                    <div key={schedule.id} className="flex justify-between items-center bg-accent/5 p-3 rounded-lg animate-slide-up">
                       <div>
-                        <div className="font-medium">Next Pay Date</div>
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(schedule.pay_date as string).toLocaleDateString()}
+                        <div className="font-medium flex items-center text-accent">
+                          <span className="inline-block w-2 h-2 rounded-full bg-accent mr-1"></span>
+                          <span>Next Payment</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {new Date(schedule.pay_date as string).toLocaleDateString(undefined, {
+                            weekday: 'short',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
                         </div>
                       </div>
                       <div className="flex gap-2 items-center">
-                        <div className="text-lg font-medium font-mono">
+                        <div className="text-lg font-bold font-mono">
                           ${Number(schedule.amount).toFixed(2)} 
                           <span className="text-xs text-muted-foreground">(est.)</span>
                         </div>
                         <Button 
-                          variant="ghost" 
+                          variant="outline" 
                           size="icon"
+                          className="rounded-full"
                           onClick={() => handleEditPaySchedule(schedule)}
                         >
                           <Edit className="h-4 w-4" />
@@ -404,15 +434,16 @@ export default function PayTab() {
                   ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center p-6 text-center h-32">
+              <div className="flex flex-col items-center justify-center p-6 text-center h-32 bg-muted/20 rounded-lg">
                 <Calendar className="h-10 w-10 text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground">No pay schedules found</p>
                 <Button 
-                  variant="outline" 
+                  variant="default" 
                   size="sm" 
-                  className="mt-2"
+                  className="mt-3 rounded-full"
                   onClick={handleAddPaySchedule}
                 >
+                  <Plus className="h-3.5 w-3.5 mr-1" />
                   Add Pay Schedule
                 </Button>
               </div>
@@ -422,26 +453,32 @@ export default function PayTab() {
       </div>
       
       {/* Pay History */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium">Pay History</h2>
+      <Card className="card-hover animate-fade-in overflow-hidden border">
+        <CardHeader className="pb-2 pt-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <div className="p-2 rounded-full bg-primary/10">
+                <History className="h-5 w-5 text-primary" />
+              </div>
+              <h2 className="text-xl font-medium">Pay History</h2>
+            </div>
             <Button 
               variant="outline" 
               size="sm" 
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 rounded-lg"
               onClick={handleAddPaySchedule}
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>Add</span>
+              <span>Add Payment</span>
             </Button>
           </div>
-          
+        </CardHeader>
+        <CardContent className="pt-2 px-6 pb-6">
           {paySchedules && paySchedules.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-5">
               {paySchedules
                 .sort((a, b) => new Date(b.pay_date as string).getTime() - new Date(a.pay_date as string).getTime())
-                .map(schedule => {
+                .map((schedule, index) => {
                   // Calculate hours for this pay period
                   const startDate = new Date(schedule.period_start as string);
                   const endDate = new Date(schedule.period_end as string);
@@ -449,69 +486,116 @@ export default function PayTab() {
                   
                   const hours = Math.round(Number(schedule.amount) / 16); // Estimate hours based on average $16/hour
                   
+                  // Status styles
+                  const getStatusStyles = (status: string) => {
+                    switch(status) {
+                      case 'paid':
+                        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800/30';
+                      case 'delayed':
+                        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800/30';
+                      default:
+                        return 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800/30';
+                    }
+                  };
+                  
+                  // Indicator icon
+                  const getStatusIcon = (status: string) => {
+                    switch(status) {
+                      case 'paid':
+                        return <CheckCircle className="h-4 w-4 mr-1.5" />;
+                      case 'delayed':
+                        return <AlertCircle className="h-4 w-4 mr-1.5" />;
+                      default:
+                        return <Clock className="h-4 w-4 mr-1.5" />;
+                    }
+                  };
+                  
                   return (
-                    <div key={schedule.id} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
-                      <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center gap-2">
+                    <div 
+                      key={schedule.id} 
+                      className={`border rounded-xl p-4 shadow-sm transition-all duration-200 hover:shadow-md ${
+                        index === 0 ? 'animate-slide-up' : ''
+                      }`}
+                    >
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center">
+                          <CalendarDays className="h-4 w-4 text-muted-foreground mr-2" />
                           <h3 className="font-medium">
-                            {startDate.toLocaleDateString()} - {endDate.toLocaleDateString()}
+                            <span className="font-mono">{startDate.toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span> - <span className="font-mono">{endDate.toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span>
                           </h3>
-                          <span className={`text-xs px-2 py-1 rounded ${
-                            schedule.status === 'paid' 
-                              ? 'bg-green-100 text-green-800' 
-                              : schedule.status === 'delayed' 
-                              ? 'bg-red-100 text-red-800' 
-                              : 'bg-amber-100 text-amber-800'
-                          }`}>
+                        </div>
+                        <div className="flex items-center">
+                          <span className={`text-xs px-2 py-1 rounded-full border flex items-center ${getStatusStyles(schedule.status)}`}>
+                            {getStatusIcon(schedule.status)}
                             {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium font-mono">${Number(schedule.amount).toFixed(2)}</span>
-                          <div className="flex">
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="flex items-center text-muted-foreground text-sm">
+                            <Calendar className="h-4 w-4 mr-1.5" />
+                            <span>Payment on {payDate.toLocaleDateString(undefined, {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric'
+                            })}</span>
+                          </div>
+                          <div className="flex items-center text-muted-foreground text-sm mt-1">
+                            <Clock className="h-4 w-4 mr-1.5" />
+                            <span>~{hours} hours worked</span>
+                          </div>
+                          {schedule.notes && (
+                            <div className="flex items-start mt-2 text-sm text-muted-foreground">
+                              <StickyNote className="h-4 w-4 mr-1.5 mt-0.5" />
+                              <span>{schedule.notes}</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex flex-col items-end">
+                          <div className="text-xl font-bold font-mono mb-2">
+                            ${Number(schedule.amount).toFixed(2)}
+                          </div>
+                          <div className="flex space-x-1">
                             <Button 
-                              variant="ghost" 
+                              variant="outline" 
                               size="icon"
+                              className="h-8 w-8 rounded-lg"
                               onClick={() => handleEditPaySchedule(schedule)}
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className="h-3.5 w-3.5" />
                             </Button>
                             <Button 
-                              variant="ghost" 
+                              variant="outline" 
                               size="icon"
+                              className="h-8 w-8 rounded-lg text-destructive hover:text-destructive-foreground hover:bg-destructive"
                               onClick={() => deletePayScheduleMutation.mutate(schedule.id)}
                             >
-                              <Trash className="h-4 w-4" />
+                              <Trash className="h-3.5 w-3.5" />
                             </Button>
                           </div>
                         </div>
                       </div>
-                      
-                      <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>Pay date: {payDate.toLocaleDateString()}</span>
-                        <span>~{hours} hours</span>
-                      </div>
-                      
-                      {schedule.notes && (
-                        <div className="mt-2 text-sm text-muted-foreground border-l-2 border-gray-200 pl-2">
-                          {schedule.notes}
-                        </div>
-                      )}
                     </div>
                   );
                 })}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center p-6 text-center h-32">
-              <Calendar className="h-10 w-10 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">No pay history found</p>
+            <div className="flex flex-col items-center justify-center p-8 text-center h-40 bg-muted/20 mt-2 rounded-xl border border-dashed">
+              <div className="bg-muted/30 p-3 rounded-full mb-3">
+                <History className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground mb-3">No payment history found</p>
               <Button 
-                variant="outline" 
+                variant="default" 
                 size="sm" 
-                className="mt-2"
+                className="rounded-full"
                 onClick={handleAddPaySchedule}
               >
-                Add Pay Record
+                <Plus className="h-3.5 w-3.5 mr-1" />
+                Add First Payment
               </Button>
             </div>
           )}
@@ -519,31 +603,40 @@ export default function PayTab() {
       </Card>
       
       {/* Yearly Pay Calendar */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium">Pay Calendar</h2>
+      <Card className="card-hover animate-fade-in overflow-hidden border-t-4 border-t-accent">
+        <CardHeader className="pb-2 pt-6">
+          <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
+              <div className="p-2 rounded-full bg-accent/10">
+                <CalendarDays className="h-5 w-5 text-accent" />
+              </div>
+              <h2 className="text-xl font-medium">Annual Pay Overview</h2>
+            </div>
+            <div className="flex items-center space-x-2 bg-muted/20 p-1 rounded-full pr-4">
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="icon" 
+                className="h-8 w-8 rounded-full hover:bg-accent/10"
                 onClick={() => handleChangeYear(selectedYear - 1)}
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="w-[80px] text-center font-medium">{selectedYear}</div>
+              <div className="font-bold text-lg gradient-text">{selectedYear}</div>
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="icon" 
+                className="h-8 w-8 rounded-full hover:bg-accent/10"
                 onClick={() => handleChangeYear(selectedYear + 1)}
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
-          
+        </CardHeader>
+        
+        <CardContent className="p-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {yearlyData?.months?.map((month: any) => {
+            {yearlyData?.months?.map((month: any, index) => {
               const monthNames = [
                 "January", "February", "March", "April", "May", "June", 
                 "July", "August", "September", "October", "November", "December"
@@ -551,19 +644,46 @@ export default function PayTab() {
               const isCurrentMonth = month.month === selectedMonth;
               const isPastMonth = month.total > 0;
               
+              // Calculate animation delay for staggered appearance
+              const animationDelay = `${index * 0.05}s`;
+              
               return (
                 <div 
                   key={month.month} 
-                  className={`border border-gray-200 rounded p-3 ${isCurrentMonth ? 'bg-primary-light bg-opacity-10' : isPastMonth ? '' : 'bg-gray-50'}`}
+                  className={`calendar-month border p-4 ${
+                    isCurrentMonth ? 'calendar-month-active shadow-md' : 
+                    isPastMonth ? 'hover:border-primary/50' : 'bg-muted/10 hover:bg-muted/20'
+                  }`}
                   onClick={() => setSelectedMonth(month.month)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ animationDelay, animationFillMode: 'both' }}
                 >
-                  <div className="font-medium mb-1">{monthNames[month.month - 1]}</div>
-                  <div className="font-mono text-sm">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className={`font-medium text-base ${isCurrentMonth ? 'text-primary' : ''}`}>
+                      {monthNames[month.month - 1]}
+                    </div>
+                    {isPastMonth && (
+                      <div className="p-1 bg-green-100 dark:bg-green-900/20 rounded-full">
+                        <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className={`font-mono text-xl font-bold ${isCurrentMonth ? 'text-primary' : ''}`}>
                     ${month.total.toFixed(2)}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {month.hours.toFixed(1)} hours
+                  
+                  <div className="flex justify-between mt-2">
+                    <div className="text-xs text-muted-foreground flex items-center">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {month.hours.toFixed(1)} hrs
+                    </div>
+                    
+                    {month.total > 0 && (
+                      <div className="text-xs px-1 py-0.5 rounded bg-secondary/10 text-secondary flex items-center">
+                        <DollarSign className="h-3 w-3 mr-0.5" />
+                        ${(month.total / month.hours).toFixed(2)}/hr
+                      </div>
+                    )}
                   </div>
                 </div>
               );

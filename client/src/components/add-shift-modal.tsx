@@ -129,10 +129,10 @@ export default function AddShiftModal({ isOpen, onClose, shift }: AddShiftModalP
       date,
       start_time: `${startTime}:00`,
       end_time: `${endTime}:00`,
-      break_time: parseFloat(breakTime),
-      hourly_rate: parseFloat(hourlyRate),
+      break_time: String(parseFloat(breakTime)),
+      hourly_rate: String(parseFloat(hourlyRate)),
       notes,
-      total_pay: totalPay
+      total_pay: String(totalPay)
     };
     
     if (isEditMode && shift) {

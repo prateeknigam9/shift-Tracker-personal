@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,9 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Settings, User as UserIcon, LogOut, ChevronDown } from "lucide-react";
+import { Settings, User as UserIcon, LogOut, ChevronDown, Moon, Sun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "next-themes";
 
 interface HeaderProps {
   user: User;
@@ -19,14 +20,29 @@ interface HeaderProps {
 export default function Header({ user }: HeaderProps) {
   const { logoutMutation } = useAuth();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
+  // Avoid hydration mismatch by mounting theme components only after initial render
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const handleLogout = () => {
     logoutMutation.mutate();
   };
   
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+    toast({
+      title: `Theme changed to ${theme === "dark" ? "light" : "dark"}`,
+      description: "Application appearance has been updated"
+    });
+  };
+  
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-background border-b shadow-sm">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <h1 className="text-xl font-medium text-primary">ShiftTracker</h1>
         
@@ -41,8 +57,22 @@ export default function Header({ user }: HeaderProps) {
               <DropdownMenuItem>General Settings</DropdownMenuItem>
               <DropdownMenuItem>Display Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => toast({ title: "Theme button clicked", description: "This functionality is not implemented yet" })}>
-                Toggle Theme
+              <DropdownMenuItem onSelect={toggleTheme}>
+                {mounted && (
+                  <>
+                    {theme === "dark" ? (
+                      <>
+                        <Sun className="h-4 w-4 mr-2" />
+                        Light Mode
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="h-4 w-4 mr-2" />
+                        Dark Mode
+                      </>
+                    )}
+                  </>
+                )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

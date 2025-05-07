@@ -51,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Login successful",
         description: `Welcome back, ${user.full_name}!`,
       });
+      window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({
@@ -72,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Registration successful",
         description: `Welcome to ShiftTracker, ${user.full_name}!`,
       });
+      window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({
@@ -92,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
+      window.location.href = "/auth";
     },
     onError: (error: Error) => {
       toast({

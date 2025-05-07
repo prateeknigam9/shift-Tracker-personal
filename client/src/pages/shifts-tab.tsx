@@ -5,9 +5,10 @@ import { Shift } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format, parseISO, getDay, addDays, startOfWeek, endOfWeek, isWithinInterval, isSameDay } from "date-fns";
+import { format, parseISO, getDay, addDays, addMonths, subMonths, startOfWeek, endOfWeek, 
+         isWithinInterval, isSameDay, startOfMonth, endOfMonth, getDaysInMonth } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { Loader2, Plus, Edit, Trash2, Bot, Calendar } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import AddShiftModal from "@/components/add-shift-modal";
 import ConfirmModal from "@/components/confirm-modal";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +21,7 @@ export default function ShiftsTab() {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [chartView, setChartView] = useState<"weekly" | "monthly">("weekly");
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   
   // Fetch shifts
   const {
@@ -75,20 +77,45 @@ export default function ShiftsTab() {
     },
   });
   
-  // Fetch AI summary
-  const {
-    data: aiSummary,
-    isLoading: isLoadingAISummary,
-  } = useQuery({
-    queryKey: ["/api/dashboard/summary"],
-    queryFn: async () => {
-      const res = await fetch("/api/dashboard/summary", {
-        credentials: "include",
+  // Fetch Monthly Calendar Data
+  const monthlyCalendarData = useMemo(() => {
+    if (!shifts) return [];
+    
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const startDate = startOfWeek(monthStart);
+    const endDate = endOfWeek(monthEnd);
+    
+    const today = new Date();
+    const daysArray = [];
+    let day = startDate;
+    
+    while (day <= endDate) {
+      const formattedDate = format(day, 'yyyy-MM-dd');
+      const isCurrentMonth = day.getMonth() === currentMonth.getMonth();
+      const isToday = isSameDay(day, today);
+      
+      // Find shifts for this day
+      const dayShifts = shifts.filter(shift => {
+        const shiftDate = new Date(shift.date.toString());
+        return isSameDay(shiftDate, day);
       });
-      if (!res.ok) throw new Error("Failed to fetch AI summary");
-      return res.json();
-    },
-  });
+      
+      daysArray.push({
+        date: day,
+        formattedDate,
+        dayNumber: format(day, 'd'),
+        isCurrentMonth,
+        isToday,
+        shifts: dayShifts,
+        hasShift: dayShifts.length > 0
+      });
+      
+      day = addDays(day, 1);
+    }
+    
+    return daysArray;
+  }, [shifts, currentMonth]);
   
   // Delete shift mutation
   const deleteShiftMutation = useMutation({
@@ -332,26 +359,97 @@ export default function ShiftsTab() {
         </CardContent>
       </Card>
 
-      {/* AI Insights */}
+      {/* Monthly Calendar */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center mb-3">
-            <div className="flex-shrink-0 bg-primary/10 rounded-full p-2 mr-3">
-              <Bot className="h-5 w-5 text-primary" />
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-lg font-medium">Monthly Schedule</CardTitle>
+            <div className="flex space-x-1">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => setCurrentMonth(new Date())}
+              >
+                <Calendar className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-            <h2 className="text-lg font-medium">AI Insights</h2>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            {format(currentMonth, 'MMMM yyyy')}
+          </p>
+        </CardHeader>
+        <CardContent>
+          {/* Calendar header - days of week */}
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div 
+                key={day} 
+                className="text-center text-muted-foreground text-xs font-medium py-1"
+              >
+                {day}
+              </div>
+            ))}
           </div>
           
-          {isLoadingAISummary ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-5 w-5 animate-spin text-primary mr-2" />
-              <span className="text-muted-foreground">Generating insights...</span>
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-sm mb-4">
-              {aiSummary?.summary || "No data available for analysis yet."}
-            </p>
-          )}
+          {/* Calendar grid */}
+          <div className="grid grid-cols-7 gap-1">
+            {monthlyCalendarData.map((day) => (
+              <div 
+                key={day.formattedDate}
+                className={cn(
+                  "relative min-h-[60px] border rounded p-1",
+                  day.isCurrentMonth ? "bg-card" : "bg-muted/30",
+                  day.isToday ? "border-primary" : "border-border",
+                  day.hasShift ? "schedule-day-active" : ""
+                )}
+                onClick={() => {
+                  if (day.hasShift) {
+                    handleOpenAddShiftModal(day.shifts[0]);
+                  }
+                }}
+              >
+                <div className={cn(
+                  "text-xs font-medium",
+                  day.isCurrentMonth ? "text-foreground" : "text-muted-foreground",
+                  day.isToday ? "text-primary font-bold" : "",
+                  !day.isCurrentMonth && "opacity-50"
+                )}>
+                  {day.dayNumber}
+                </div>
+                
+                {day.hasShift && (
+                  <div className="mt-1">
+                    {day.shifts.map((shift) => (
+                      <div 
+                        key={shift.id}
+                        className={cn(
+                          "text-[10px] mb-1 truncate rounded px-1 py-0.5 cursor-pointer",
+                          "bg-secondary/20 text-secondary-foreground"
+                        )}
+                        title={`${formatTime(shift.start_time)} - ${formatTime(shift.end_time)}`}
+                      >
+                        {formatTime(shift.start_time)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
       

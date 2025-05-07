@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import { Redirect, Route } from "wouter";
+import { useLocation, Redirect, Route } from "wouter";
+import { useEffect } from "react";
 
 export function ProtectedRoute({
   path,
@@ -10,6 +11,14 @@ export function ProtectedRoute({
   children: React.ReactNode;
 }) {
   const { user, isLoading } = useAuth();
+  const [location, setLocation] = useLocation();
+  
+  // Force a check of authentication status
+  useEffect(() => {
+    if (!isLoading && !user && location !== "/auth") {
+      setLocation("/auth");
+    }
+  }, [user, isLoading, location, setLocation]);
 
   return (
     <Route path={path}>

@@ -8,6 +8,7 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   full_name: text("full_name").notNull(),
+  is_admin: integer("is_admin").default(0),
 });
 
 export const shifts = pgTable("shifts", {

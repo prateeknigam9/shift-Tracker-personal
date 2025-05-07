@@ -10,6 +10,7 @@ import backupRoutes from "./routes/backupRoutes";
 import achievementsRoutes from "./routes/achievementsRoutes";
 import analyticsRoutes from "./routes/analyticsRoutes";
 import kpiRoutes from "./routes/kpiRoutes";
+import adminRoutes from "./routes/adminRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
@@ -25,6 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/achievements", achievementsRoutes);
   app.use("/api/analytics", analyticsRoutes);
   app.use("/api/kpi", kpiRoutes);
+  app.use("/api/admin", adminRoutes);
   
   const httpServer = createServer(app);
   

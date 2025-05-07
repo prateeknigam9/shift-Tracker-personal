@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { format, parseISO } from "date-fns";
-import { Loader2, Plus, Calendar, Edit, Trash } from "lucide-react";
+import { format, parseISO, addYears, subYears } from "date-fns";
+import { Loader2, Plus, Calendar, Edit, Trash, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,7 +26,9 @@ import {
 } from "@/components/ui/select";
 
 export default function PayTab() {
-  const [year] = useState(new Date().getFullYear());
+  const currentDate = new Date();
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [showPayScheduleDialog, setShowPayScheduleDialog] = useState(false);
   const [payScheduleFormData, setPayScheduleFormData] = useState({
     pay_date: '',
@@ -44,9 +46,9 @@ export default function PayTab() {
     isLoading: isLoadingYearly,
     error: yearlyError,
   } = useQuery({
-    queryKey: ["/api/pay/yearly", year],
+    queryKey: ["/api/pay/yearly", selectedYear],
     queryFn: async () => {
-      const res = await fetch(`/api/pay/yearly?year=${year}`, {
+      const res = await fetch(`/api/pay/yearly?year=${selectedYear}`, {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch yearly pay summary");
@@ -200,13 +202,30 @@ export default function PayTab() {
     );
   }
   
-  // Get current month data
-  const currentMonth = new Date().getMonth() + 1;
-  const monthData = yearlyData?.months?.find((m: any) => m.month === currentMonth);
+  // Get selected month data
+  const selectedMonthData = yearlyData?.months?.find((m: any) => m.month === selectedMonth);
   
   // Get previous month data
-  const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+  const prevMonth = selectedMonth === 1 ? 12 : selectedMonth - 1;
   const prevMonthData = yearlyData?.months?.find((m: any) => m.month === prevMonth);
+  
+  // Helper function to change month
+  const handleChangeMonth = (newMonth: number) => {
+    if (newMonth < 1) {
+      setSelectedMonth(12);
+      setSelectedYear(prev => prev - 1);
+    } else if (newMonth > 12) {
+      setSelectedMonth(1);
+      setSelectedYear(prev => prev + 1);
+    } else {
+      setSelectedMonth(newMonth);
+    }
+  };
+  
+  // Helper function to change year
+  const handleChangeYear = (newYear: number) => {
+    setSelectedYear(newYear);
+  };
   
   // Calculate month-over-month change
   let percentChange = 0;

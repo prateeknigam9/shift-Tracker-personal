@@ -1,4 +1,11 @@
-import { users, shifts, achievements, pay_schedules, type User, type InsertUser, type Shift, type InsertShift, type Achievement, type InsertAchievement, type PaySchedule, type InsertPaySchedule, type UpdatePaySchedule } from "@shared/schema";
+import { 
+  users, shifts, achievements, pay_schedules, wellness_metrics, wellness_goals,
+  type User, type InsertUser, type Shift, type InsertShift, 
+  type Achievement, type InsertAchievement, type PaySchedule, 
+  type InsertPaySchedule, type UpdatePaySchedule, type WellnessMetric,
+  type InsertWellnessMetric, type UpdateWellnessMetric, type WellnessGoal,
+  type InsertWellnessGoal, type UpdateWellnessGoal
+} from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, desc, lt, gt, gte, lte, between } from "drizzle-orm";
 import session from "express-session";
@@ -41,6 +48,22 @@ export interface IStorage {
   // Achievements
   getUserAchievements(userId: number): Promise<Achievement[]>;
   addAchievement(achievement: InsertAchievement): Promise<Achievement>;
+  
+  // Wellness Metrics methods
+  getWellnessMetrics(userId: number): Promise<WellnessMetric[]>;
+  getWellnessMetricById(userId: number, metricId: number): Promise<WellnessMetric | undefined>;
+  createWellnessMetric(metric: InsertWellnessMetric): Promise<WellnessMetric>;
+  updateWellnessMetric(userId: number, metricId: number, metricData: UpdateWellnessMetric): Promise<WellnessMetric | undefined>;
+  deleteWellnessMetric(userId: number, metricId: number): Promise<boolean>;
+  getRecentWellnessMetrics(userId: number, days: number): Promise<WellnessMetric[]>;
+  
+  // Wellness Goals methods
+  getWellnessGoals(userId: number): Promise<WellnessGoal[]>;
+  getWellnessGoalById(userId: number, goalId: number): Promise<WellnessGoal | undefined>;
+  createWellnessGoal(goal: InsertWellnessGoal): Promise<WellnessGoal>;
+  updateWellnessGoal(userId: number, goalId: number, goalData: UpdateWellnessGoal): Promise<WellnessGoal | undefined>;
+  deleteWellnessGoal(userId: number, goalId: number): Promise<boolean>;
+  getActiveWellnessGoals(userId: number): Promise<WellnessGoal[]>;
   
   // Session store
   sessionStore: any;
@@ -462,6 +485,141 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return achievement;
+  }
+
+  // Wellness Metrics methods
+  async getWellnessMetrics(userId: number): Promise<WellnessMetric[]> {
+    return await db
+      .select()
+      .from(wellness_metrics)
+      .where(eq(wellness_metrics.user_id, userId))
+      .orderBy(desc(wellness_metrics.date));
+  }
+
+  async getWellnessMetricById(userId: number, metricId: number): Promise<WellnessMetric | undefined> {
+    const [metric] = await db
+      .select()
+      .from(wellness_metrics)
+      .where(and(
+        eq(wellness_metrics.id, metricId),
+        eq(wellness_metrics.user_id, userId)
+      ));
+    return metric;
+  }
+
+  async createWellnessMetric(metricData: InsertWellnessMetric): Promise<WellnessMetric> {
+    const [metric] = await db
+      .insert(wellness_metrics)
+      .values(metricData)
+      .returning();
+    return metric;
+  }
+
+  async updateWellnessMetric(userId: number, metricId: number, metricData: UpdateWellnessMetric): Promise<WellnessMetric | undefined> {
+    const [updatedMetric] = await db
+      .update(wellness_metrics)
+      .set(metricData)
+      .where(and(
+        eq(wellness_metrics.id, metricId),
+        eq(wellness_metrics.user_id, userId)
+      ))
+      .returning();
+    return updatedMetric;
+  }
+
+  async deleteWellnessMetric(userId: number, metricId: number): Promise<boolean> {
+    const result = await db
+      .delete(wellness_metrics)
+      .where(and(
+        eq(wellness_metrics.id, metricId),
+        eq(wellness_metrics.user_id, userId)
+      ))
+      .returning({ id: wellness_metrics.id });
+    return result.length > 0;
+  }
+
+  async getRecentWellnessMetrics(userId: number, days: number): Promise<WellnessMetric[]> {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    
+    return await db
+      .select()
+      .from(wellness_metrics)
+      .where(and(
+        eq(wellness_metrics.user_id, userId),
+        gte(wellness_metrics.date, startDate.toISOString().split('T')[0]),
+        lte(wellness_metrics.date, endDate.toISOString().split('T')[0])
+      ))
+      .orderBy(wellness_metrics.date);
+  }
+
+  // Wellness Goals methods
+  async getWellnessGoals(userId: number): Promise<WellnessGoal[]> {
+    return await db
+      .select()
+      .from(wellness_goals)
+      .where(eq(wellness_goals.user_id, userId))
+      .orderBy(desc(wellness_goals.created_at));
+  }
+
+  async getWellnessGoalById(userId: number, goalId: number): Promise<WellnessGoal | undefined> {
+    const [goal] = await db
+      .select()
+      .from(wellness_goals)
+      .where(and(
+        eq(wellness_goals.id, goalId),
+        eq(wellness_goals.user_id, userId)
+      ));
+    return goal;
+  }
+
+  async createWellnessGoal(goalData: InsertWellnessGoal): Promise<WellnessGoal> {
+    const [goal] = await db
+      .insert(wellness_goals)
+      .values(goalData)
+      .returning();
+    return goal;
+  }
+
+  async updateWellnessGoal(userId: number, goalId: number, goalData: UpdateWellnessGoal): Promise<WellnessGoal | undefined> {
+    const [updatedGoal] = await db
+      .update(wellness_goals)
+      .set(goalData)
+      .where(and(
+        eq(wellness_goals.id, goalId),
+        eq(wellness_goals.user_id, userId)
+      ))
+      .returning();
+    return updatedGoal;
+  }
+
+  async deleteWellnessGoal(userId: number, goalId: number): Promise<boolean> {
+    const result = await db
+      .delete(wellness_goals)
+      .where(and(
+        eq(wellness_goals.id, goalId),
+        eq(wellness_goals.user_id, userId)
+      ))
+      .returning({ id: wellness_goals.id });
+    return result.length > 0;
+  }
+
+  async getActiveWellnessGoals(userId: number): Promise<WellnessGoal[]> {
+    const today = new Date().toISOString().split('T')[0];
+    
+    return await db
+      .select()
+      .from(wellness_goals)
+      .where(and(
+        eq(wellness_goals.user_id, userId),
+        eq(wellness_goals.is_active, 1),
+        lte(wellness_goals.start_date, today),
+        or(
+          eq(wellness_goals.end_date, null),
+          gte(wellness_goals.end_date, today)
+        )
+      ));
   }
 }
 

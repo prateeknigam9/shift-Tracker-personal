@@ -9,6 +9,7 @@ import profileRoutes from "./routes/profileRoutes";
 import backupRoutes from "./routes/backupRoutes";
 import achievementsRoutes from "./routes/achievementsRoutes";
 import analyticsRoutes from "./routes/analyticsRoutes";
+import wellnessRoutes from "./routes/wellnessRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
@@ -23,6 +24,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/backup", backupRoutes);
   app.use("/api/achievements", achievementsRoutes);
   app.use("/api/analytics", analyticsRoutes);
+  app.use("/api/wellness", wellnessRoutes);
   
   const httpServer = createServer(app);
   

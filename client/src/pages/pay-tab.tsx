@@ -665,8 +665,8 @@ export default function PayTab() {
                       {monthNames[month.month - 1]}
                     </div>
                     {isPastMonth && (
-                      <div className="p-1 bg-green-100 dark:bg-green-900/20 rounded-full">
-                        <Calendar className="h-3 w-3 text-green-600 dark:text-green-400" />
+                      <div className="p-1 bg-green-100/80 dark:bg-green-900/30 rounded-full shadow-sm">
+                        <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
                       </div>
                     )}
                   </div>
@@ -677,13 +677,13 @@ export default function PayTab() {
                   
                   <div className="flex justify-between mt-2">
                     <div className="text-xs text-muted-foreground flex items-center">
-                      <Calendar className="h-3 w-3 mr-1" />
+                      <Clock className="h-3 w-3 mr-1" />
                       {month.hours.toFixed(1)} hrs
                     </div>
                     
                     {month.total > 0 && (
-                      <div className="text-xs px-1 py-0.5 rounded bg-secondary/10 text-secondary flex items-center">
-                        <Calendar className="h-3 w-3 mr-0.5" />
+                      <div className="text-xs px-1.5 py-0.5 rounded-full bg-secondary/10 text-secondary flex items-center shadow-sm">
+                        <DollarSign className="h-3 w-3 mr-0.5" />
                         ${(month.total / month.hours).toFixed(2)}/hr
                       </div>
                     )}
@@ -697,9 +697,9 @@ export default function PayTab() {
 
       {/* Pay Schedule Dialog */}
       <Dialog open={showPayScheduleDialog} onOpenChange={setShowPayScheduleDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingScheduleId ? 'Edit' : 'Add'} Pay Schedule</DialogTitle>
+        <DialogContent className="fancy-dialog">
+          <DialogHeader className="card-header-gradient">
+            <DialogTitle className="text-lg">{editingScheduleId ? 'Edit' : 'Add'} Pay Schedule</DialogTitle>
             <DialogDescription>
               {editingScheduleId ? 'Update the' : 'Add a new'} pay schedule with payment details.
             </DialogDescription>
@@ -784,14 +784,19 @@ export default function PayTab() {
             </div>
           </div>
           
-          <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setShowPayScheduleDialog(false);
-              resetPayScheduleForm();
-            }}>
+          <DialogFooter className="mt-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowPayScheduleDialog(false);
+                resetPayScheduleForm();
+              }}
+              className="rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors"
+            >
               Cancel
             </Button>
             <Button 
+              variant="default"
               onClick={handleSubmitPaySchedule} 
               disabled={
                 createPayScheduleMutation.isPending || 
@@ -801,6 +806,7 @@ export default function PayTab() {
                 !payScheduleFormData.period_end ||
                 !payScheduleFormData.amount
               }
+              className="rounded-lg btn-shine"
             >
               {(createPayScheduleMutation.isPending || updatePayScheduleMutation.isPending) ? (
                 <>

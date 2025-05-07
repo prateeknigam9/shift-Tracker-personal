@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Shift } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, getDay, addDays, startOfWeek, endOfWeek, isWithinInterval, isSameDay } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { Loader2, Plus, Edit, Trash2, Bot } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Bot, Calendar } from "lucide-react";
 import AddShiftModal from "@/components/add-shift-modal";
 import ConfirmModal from "@/components/confirm-modal";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function ShiftsTab() {
   const { user } = useAuth();
@@ -28,6 +29,36 @@ export default function ShiftsTab() {
   } = useQuery<Shift[]>({
     queryKey: ["/api/shifts"],
   });
+  
+  // Generate weekly schedule data
+  const weeklyScheduleData = useMemo(() => {
+    if (!shifts) return [];
+    
+    const today = new Date();
+    const weekStart = startOfWeek(today, { weekStartsOn: 0 }); // Start on Sunday
+    const weekEnd = endOfWeek(today, { weekStartsOn: 0 });
+    
+    // Generate array of day objects for the current week
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const date = addDays(weekStart, i);
+      const dayShifts = shifts.filter(shift => {
+        const shiftDate = new Date(shift.date.toString());
+        return isSameDay(shiftDate, date);
+      });
+      
+      days.push({
+        date,
+        dayName: format(date, 'EEE'),
+        dayNumber: format(date, 'd'),
+        isToday: isSameDay(date, today),
+        hasShift: dayShifts.length > 0,
+        shifts: dayShifts
+      });
+    }
+    
+    return days;
+  }, [shifts]);
   
   // Fetch dashboard data
   const {
@@ -250,6 +281,57 @@ export default function ShiftsTab() {
         </CardContent>
       </Card>
       
+      {/* Weekly Schedule */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium">Weekly Schedule</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-7 gap-2">
+            {weeklyScheduleData.map((day) => (
+              <div key={day.dayName} className="flex flex-col items-center">
+                <div className="text-sm font-medium text-muted-foreground mb-1">
+                  {day.dayName}
+                </div>
+                <div 
+                  className={cn(
+                    "w-12 h-12 rounded-full flex items-center justify-center mb-1",
+                    day.isToday ? "border-2 border-primary font-semibold" : "",
+                    day.hasShift ? "bg-green-100 dark:bg-green-900" : ""
+                  )}
+                >
+                  <span className={cn(
+                    "text-lg",
+                    day.hasShift ? "text-green-800 dark:text-green-200" : ""
+                  )}>
+                    {day.dayNumber}
+                  </span>
+                </div>
+                {day.hasShift && (
+                  <div className="text-xs text-muted-foreground">
+                    {day.shifts.length} shift{day.shifts.length > 1 ? 's' : ''}
+                  </div>
+                )}
+                {day.hasShift && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="mt-1 h-6 text-xs px-2"
+                    onClick={() => {
+                      const firstShift = day.shifts[0];
+                      handleOpenAddShiftModal(firstShift);
+                    }}
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    View
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* AI Insights */}
       <Card>
         <CardContent className="p-4">

@@ -27,6 +27,16 @@ import {
 
 export default function PayTab() {
   const [year] = useState(new Date().getFullYear());
+  const [showPayScheduleDialog, setShowPayScheduleDialog] = useState(false);
+  const [payScheduleFormData, setPayScheduleFormData] = useState({
+    pay_date: '',
+    period_start: '',
+    period_end: '',
+    amount: '',
+    status: 'pending',
+    notes: ''
+  });
+  const [editingScheduleId, setEditingScheduleId] = useState<number | null>(null);
   
   // Fetch yearly pay summary
   const {
@@ -44,7 +54,137 @@ export default function PayTab() {
     },
   });
   
-  if (isLoadingYearly) {
+  // Fetch pay schedules
+  const {
+    data: paySchedules,
+    isLoading: isLoadingSchedules,
+    error: paySchedulesError,
+  } = useQuery({
+    queryKey: ["/api/pay-schedules"],
+    queryFn: async () => {
+      const res = await fetch("/api/pay-schedules", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch pay schedules");
+      return res.json() as Promise<PaySchedule[]>;
+    },
+  });
+  
+  // Create pay schedule mutation
+  const createPayScheduleMutation = useMutation({
+    mutationFn: async (data: typeof payScheduleFormData) => {
+      const res = await apiRequest("POST", "/api/pay-schedules", data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/pay-schedules"] });
+      setShowPayScheduleDialog(false);
+      resetPayScheduleForm();
+      toast({
+        title: "Success",
+        description: "Pay schedule created successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create pay schedule",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update pay schedule mutation
+  const updatePayScheduleMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: typeof payScheduleFormData }) => {
+      const res = await apiRequest("PATCH", `/api/pay-schedules/${id}`, data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/pay-schedules"] });
+      setShowPayScheduleDialog(false);
+      resetPayScheduleForm();
+      toast({
+        title: "Success",
+        description: "Pay schedule updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update pay schedule",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete pay schedule mutation
+  const deletePayScheduleMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/pay-schedules/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/pay-schedules"] });
+      toast({
+        title: "Success",
+        description: "Pay schedule deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete pay schedule",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle form submission
+  const handleSubmitPaySchedule = () => {
+    if (editingScheduleId) {
+      updatePayScheduleMutation.mutate({
+        id: editingScheduleId,
+        data: payScheduleFormData,
+      });
+    } else {
+      createPayScheduleMutation.mutate(payScheduleFormData);
+    }
+  };
+
+  // Reset form
+  const resetPayScheduleForm = () => {
+    setPayScheduleFormData({
+      pay_date: '',
+      period_start: '',
+      period_end: '',
+      amount: '',
+      status: 'pending',
+      notes: ''
+    });
+    setEditingScheduleId(null);
+  };
+
+  // Open pay schedule dialog for editing
+  const handleEditPaySchedule = (schedule: PaySchedule) => {
+    setPayScheduleFormData({
+      pay_date: schedule.pay_date as string,
+      period_start: schedule.period_start as string,
+      period_end: schedule.period_end as string,
+      amount: String(schedule.amount),
+      status: schedule.status,
+      notes: schedule.notes || ''
+    });
+    setEditingScheduleId(schedule.id);
+    setShowPayScheduleDialog(true);
+  };
+
+  // Open pay schedule dialog for creating
+  const handleAddPaySchedule = () => {
+    resetPayScheduleForm();
+    setShowPayScheduleDialog(true);
+  };
+  
+  if (isLoadingYearly || isLoadingSchedules) {
     return (
       <div className="flex justify-center items-center p-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -52,7 +192,7 @@ export default function PayTab() {
     );
   }
   
-  if (yearlyError) {
+  if (yearlyError || paySchedulesError) {
     return (
       <div className="p-6 text-center">
         <p className="text-destructive">Failed to load pay data. Please try again.</p>
@@ -133,24 +273,90 @@ export default function PayTab() {
         
         <Card>
           <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Pay Schedule</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="font-medium">Last Pay Date</div>
-                  <div className="text-sm text-muted-foreground">May 15, 2023</div>
-                </div>
-                <div className="text-lg font-medium font-mono">$624.00</div>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="font-medium">Next Pay Date</div>
-                  <div className="text-sm text-muted-foreground">May 31, 2023</div>
-                </div>
-                <div className="text-lg font-medium font-mono">$624.00 <span className="text-xs text-muted-foreground">(est.)</span></div>
-              </div>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm font-medium text-muted-foreground">Pay Schedule</h3>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1"
+                onClick={handleAddPaySchedule}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Add</span>
+              </Button>
             </div>
+            
+            {paySchedules && paySchedules.length > 0 ? (
+              <div className="space-y-3">
+                {/* Display last paid schedule */}
+                {paySchedules
+                  .filter(s => s.status === 'paid')
+                  .sort((a, b) => new Date(b.pay_date as string).getTime() - new Date(a.pay_date as string).getTime())
+                  .slice(0, 1)
+                  .map(schedule => (
+                    <div key={schedule.id} className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">Last Pay Date</div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(schedule.pay_date as string).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <div className="text-lg font-medium font-mono">${Number(schedule.amount).toFixed(2)}</div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleEditPaySchedule(schedule)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                
+                {/* Display next upcoming schedule */}
+                {paySchedules
+                  .filter(s => s.status === 'pending')
+                  .sort((a, b) => new Date(a.pay_date as string).getTime() - new Date(b.pay_date as string).getTime())
+                  .slice(0, 1)
+                  .map(schedule => (
+                    <div key={schedule.id} className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">Next Pay Date</div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(schedule.pay_date as string).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <div className="text-lg font-medium font-mono">
+                          ${Number(schedule.amount).toFixed(2)} 
+                          <span className="text-xs text-muted-foreground">(est.)</span>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleEditPaySchedule(schedule)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-6 text-center h-32">
+                <Calendar className="h-10 w-10 text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">No pay schedules found</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={handleAddPaySchedule}
+                >
+                  Add Pay Schedule
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -158,23 +364,97 @@ export default function PayTab() {
       {/* Pay History */}
       <Card>
         <CardContent className="p-4">
-          <h2 className="text-lg font-medium mb-4">Pay History</h2>
-          
-          <div className="space-y-4">
-            {payPeriods.map((period, index) => (
-              <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium">{period.period}</h3>
-                  <span className="font-medium font-mono">${period.total.toFixed(2)}</span>
-                </div>
-                
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{period.hours} hours</span>
-                  <span>${period.hourlyAvg.toFixed(2)}/hour avg.</span>
-                </div>
-              </div>
-            ))}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-medium">Pay History</h2>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1"
+              onClick={handleAddPaySchedule}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add</span>
+            </Button>
           </div>
+          
+          {paySchedules && paySchedules.length > 0 ? (
+            <div className="space-y-4">
+              {paySchedules
+                .sort((a, b) => new Date(b.pay_date as string).getTime() - new Date(a.pay_date as string).getTime())
+                .map(schedule => {
+                  // Calculate hours for this pay period
+                  const startDate = new Date(schedule.period_start as string);
+                  const endDate = new Date(schedule.period_end as string);
+                  const payDate = new Date(schedule.pay_date as string);
+                  
+                  const hours = Math.round(Number(schedule.amount) / 16); // Estimate hours based on average $16/hour
+                  
+                  return (
+                    <div key={schedule.id} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium">
+                            {startDate.toLocaleDateString()} - {endDate.toLocaleDateString()}
+                          </h3>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            schedule.status === 'paid' 
+                              ? 'bg-green-100 text-green-800' 
+                              : schedule.status === 'delayed' 
+                              ? 'bg-red-100 text-red-800' 
+                              : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium font-mono">${Number(schedule.amount).toFixed(2)}</span>
+                          <div className="flex">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => handleEditPaySchedule(schedule)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => deletePayScheduleMutation.mutate(schedule.id)}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>Pay date: {payDate.toLocaleDateString()}</span>
+                        <span>~{hours} hours</span>
+                      </div>
+                      
+                      {schedule.notes && (
+                        <div className="mt-2 text-sm text-muted-foreground border-l-2 border-gray-200 pl-2">
+                          {schedule.notes}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center p-6 text-center h-32">
+              <Calendar className="h-10 w-10 text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">No pay history found</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+                onClick={handleAddPaySchedule}
+              >
+                Add Pay Record
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
       
@@ -210,6 +490,126 @@ export default function PayTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Pay Schedule Dialog */}
+      <Dialog open={showPayScheduleDialog} onOpenChange={setShowPayScheduleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingScheduleId ? 'Edit' : 'Add'} Pay Schedule</DialogTitle>
+            <DialogDescription>
+              {editingScheduleId ? 'Update the' : 'Add a new'} pay schedule with payment details.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pay_date">Pay Date</Label>
+                <Input
+                  id="pay_date"
+                  type="date"
+                  value={payScheduleFormData.pay_date}
+                  onChange={(e) => setPayScheduleFormData({...payScheduleFormData, pay_date: e.target.value})}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="amount">Amount ($)</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={payScheduleFormData.amount}
+                  onChange={(e) => setPayScheduleFormData({...payScheduleFormData, amount: e.target.value})}
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="period_start">Period Start</Label>
+                <Input
+                  id="period_start"
+                  type="date"
+                  value={payScheduleFormData.period_start}
+                  onChange={(e) => setPayScheduleFormData({...payScheduleFormData, period_start: e.target.value})}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="period_end">Period End</Label>
+                <Input
+                  id="period_end"
+                  type="date"
+                  value={payScheduleFormData.period_end}
+                  onChange={(e) => setPayScheduleFormData({...payScheduleFormData, period_end: e.target.value})}
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select 
+                value={payScheduleFormData.status} 
+                onValueChange={(value) => setPayScheduleFormData({...payScheduleFormData, status: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="delayed">Delayed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Input
+                id="notes"
+                value={payScheduleFormData.notes || ''}
+                onChange={(e) => setPayScheduleFormData({...payScheduleFormData, notes: e.target.value})}
+                placeholder="Optional notes"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowPayScheduleDialog(false);
+              resetPayScheduleForm();
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmitPaySchedule} 
+              disabled={
+                createPayScheduleMutation.isPending || 
+                updatePayScheduleMutation.isPending ||
+                !payScheduleFormData.pay_date ||
+                !payScheduleFormData.period_start ||
+                !payScheduleFormData.period_end ||
+                !payScheduleFormData.amount
+              }
+            >
+              {(createPayScheduleMutation.isPending || updatePayScheduleMutation.isPending) ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>{editingScheduleId ? 'Update' : 'Add'}</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

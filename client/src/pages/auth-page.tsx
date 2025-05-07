@@ -6,9 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2 } from "lucide-react";
+import { Loader2, User, Lock, Calendar, ChevronRight } from "lucide-react";
 
 const loginSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -68,131 +68,252 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 login-bg">
-      <Card className="w-full max-w-md">
-        <CardContent className="pt-6">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-medium text-primary">
-              {isLoginView ? "ShiftTracker" : "Create Account"}
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              {isLoginView
-                ? "Track your shifts. Calculate your pay."
-                : "Join ShiftTracker to manage your work schedule"}
+      <div className="grid md:grid-cols-2 gap-8 w-full max-w-4xl">
+        {/* Hero section */}
+        <div className="relative hidden md:flex flex-col justify-center p-8 text-white glass-effect rounded-xl animate-fade-in z-10 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-primary/20 backdrop-blur-md -z-10"></div>
+          <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-white/10 to-transparent -z-10"></div>
+          <div className="absolute bottom-0 right-0 w-24 h-24 rounded-full bg-secondary/20 blur-3xl -z-10"></div>
+          
+          <div className="relative z-10 space-y-6">
+            <div className="flex items-center space-x-3">
+              <Calendar className="h-12 w-12 text-white p-2 bg-primary/30 rounded-xl shadow-lg" />
+              <h1 className="text-3xl font-bold gradient-text">ShiftTracker</h1>
+            </div>
+            
+            <p className="text-lg">
+              The easiest way to track your shifts, calculate pay, and manage your work schedule.
             </p>
-  
+            
+            <ul className="space-y-4 mt-6">
+              <li className="flex items-center space-x-3 bg-white/5 p-3 rounded-lg">
+                <div className="p-2 rounded-full bg-accent/20">
+                  <ChevronRight className="h-5 w-5 text-white" />
+                </div>
+                <span>Record hours and calculate earnings</span>
+              </li>
+              <li className="flex items-center space-x-3 bg-white/5 p-3 rounded-lg">
+                <div className="p-2 rounded-full bg-accent/20">
+                  <ChevronRight className="h-5 w-5 text-white" />
+                </div>
+                <span>Track payment history and schedules</span>
+              </li>
+              <li className="flex items-center space-x-3 bg-white/5 p-3 rounded-lg">
+                <div className="p-2 rounded-full bg-accent/20">
+                  <ChevronRight className="h-5 w-5 text-white" />
+                </div>
+                <span>Visualize your work patterns</span>
+              </li>
+            </ul>
           </div>
+        </div>
 
-          {isLoginView ? (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Username</label>
-                <input 
-                  type="text"
-                  value={loginForm.watch('username')}
-                  onChange={(e) => loginForm.setValue('username', e.target.value)}
-                  placeholder="Enter your username"
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Password</label>
-                <input 
-                  type="password"
-                  value={loginForm.watch('password')}
-                  onChange={(e) => loginForm.setValue('password', e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-
-              <button
-                onClick={() => loginForm.handleSubmit(onLoginSubmit)()}
-                className="w-full p-2 bg-primary text-white rounded"
-                disabled={loginMutation.isPending}
-              >
-                {loginMutation.isPending ? "Logging in..." : "Log In"}
-              </button>
-
-              <div className="text-center text-sm text-muted-foreground">
-                Don't have an account?{" "}
-                <button
-                  type="button"
-                  className="text-primary underline"
-                  onClick={() => setIsLoginView(false)}
-                >
-                  Register
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Full Name</label>
-                <input 
-                  type="text"
-                  value={registerForm.watch('full_name')}
-                  onChange={(e) => registerForm.setValue('full_name', e.target.value)}
-                  placeholder="Enter your full name"
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Username</label>
-                <input 
-                  type="text"
-                  value={registerForm.watch('username')}
-                  onChange={(e) => registerForm.setValue('username', e.target.value)}
-                  placeholder="Choose a username"
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Password</label>
-                <input 
-                  type="password"
-                  value={registerForm.watch('password')}
-                  onChange={(e) => registerForm.setValue('password', e.target.value)}
-                  placeholder="Create a password"
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Confirm Password</label>
-                <input 
-                  type="password"
-                  value={registerForm.watch('confirmPassword')}
-                  onChange={(e) => registerForm.setValue('confirmPassword', e.target.value)}
-                  placeholder="Confirm your password"
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-
-              <button
-                onClick={() => registerForm.handleSubmit(onRegisterSubmit)()}
-                className="w-full p-2 bg-primary text-white rounded"
-                disabled={registerMutation.isPending}
-              >
-                {registerMutation.isPending ? "Creating Account..." : "Create Account"}
-              </button>
-
-              <div className="text-center text-sm text-muted-foreground">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  className="text-primary underline"
-                  onClick={() => setIsLoginView(true)}
-                >
-                  Log In
-                </button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        {/* Auth card */}
+        <Card className="w-full animate-slide-up shadow-lg border-t-4 border-t-primary">
+          <CardHeader className="pb-4 card-header-gradient">
+            <CardTitle className="text-2xl font-medium text-center gradient-text">
+              {isLoginView ? "Welcome Back" : "Create Account"}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {isLoginView
+                ? "Sign in to access your ShiftTracker account"
+                : "Join ShiftTracker to manage your work schedule"}
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="pt-2">
+            {isLoginView ? (
+              <Form {...loginForm}>
+                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                  <FormField
+                    control={loginForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-muted-foreground">
+                            <User className="h-4 w-4" />
+                          </span>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="Enter your username" 
+                              className="pl-9"
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={loginForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-muted-foreground">
+                            <Lock className="h-4 w-4" />
+                          </span>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="password" 
+                              placeholder="Enter your password"
+                              className="pl-9"
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full login-button btn-shine rounded-lg"
+                    disabled={loginMutation.isPending}
+                  >
+                    {loginMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : "Sign In"}
+                  </Button>
+                  
+                  <div className="text-center text-sm text-muted-foreground">
+                    Don't have an account?{" "}
+                    <button
+                      type="button"
+                      className="text-primary hover:text-primary/80 font-medium transition-colors"
+                      onClick={() => setIsLoginView(false)}
+                    >
+                      Create one
+                    </button>
+                  </div>
+                </form>
+              </Form>
+            ) : (
+              <Form {...registerForm}>
+                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                  <FormField
+                    control={registerForm.control}
+                    name="full_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter your full name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-muted-foreground">
+                            <User className="h-4 w-4" />
+                          </span>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              placeholder="Choose a username" 
+                              className="pl-9"
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-muted-foreground">
+                            <Lock className="h-4 w-4" />
+                          </span>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="password" 
+                              placeholder="Create a strong password"
+                              className="pl-9"
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-muted-foreground">
+                            <Lock className="h-4 w-4" />
+                          </span>
+                          <FormControl>
+                            <Input 
+                              {...field} 
+                              type="password" 
+                              placeholder="Confirm your password"
+                              className="pl-9"
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full login-button btn-shine rounded-lg"
+                    disabled={registerMutation.isPending}
+                  >
+                    {registerMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : "Create Account"}
+                  </Button>
+                  
+                  <div className="text-center text-sm text-muted-foreground">
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      className="text-primary hover:text-primary/80 font-medium transition-colors"
+                      onClick={() => setIsLoginView(true)}
+                    >
+                      Sign in
+                    </button>
+                  </div>
+                </form>
+              </Form>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

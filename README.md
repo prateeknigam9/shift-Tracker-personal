@@ -89,27 +89,28 @@ A comprehensive shift tracking mobile web application built with Node.js backend
    - `GROQ_API_KEY`: Your GROQ API key (if applicable)
    - `NODE_ENV`: Set to `production`
 
-### Step 5: Configure Database Migrations
+### Step 5: Configure Database Migrations in Build Command
 
-1. Create a "Shell Script" file in your Render dashboard:
-   - On your dashboard, click "New +" and select "Shell"
-   - Name it `database-setup`
-   - Configure it to run once, not on a schedule
-   - Add the following script:
-     ```bash
-     #!/bin/bash
-     cd /opt/render/project/src
-     npm run db:push
-     ```
-   - Click "Save"
-2. Run this script after your web service is deployed to set up your database schema
+To automatically run database migrations during deployment (without using Shell Scripts):
+
+1. In your web service settings, go back to the "Settings" tab
+2. Modify your Build Command to include database migrations:
+   ```bash
+   npm install && npm run build && npm run db:push
+   ```
+3. Click "Save Changes"
+
+This approach runs the database migrations automatically as part of the build process.
 
 ### Step 6: Deploy Your Application
 
-1. Return to your web service and click "Manual Deploy" to trigger a deployment
-2. Once deployment is complete, click "Shell Script" from your dashboard
-3. Run the database setup script to initialize your database
-4. Your application should now be accessible at the provided Render URL
+1. Return to your web service dashboard and click "Manual Deploy" to trigger a deployment
+2. Render will now:
+   - Install dependencies
+   - Build your application
+   - Run database migrations to create required tables
+   - Start your application
+3. Your application should now be accessible at the provided Render URL
 
 ### Step 7: Access Your Application
 
@@ -129,8 +130,9 @@ If you need to update environment variables after deployment:
 ## Troubleshooting
 
 - **Database Connection Issues**: Verify that your DATABASE_URL is correct and that your IP is allowed in the database firewall settings
-- **Migration Errors**: Run the database setup script again or check logs for specific error messages
-- **Application Errors**: Check the Render logs from your web service dashboard
+- **Migration Errors**: Check build logs for migration errors or manually run migrations by adding `npm run db:push` to your build command if it wasn't included initially
+- **Application Errors**: Check the Render logs from your web service dashboard for detailed error messages
+- **Table Not Found Errors**: These usually indicate the migrations didn't run successfully. Verify your build logs and ensure the DATABASE_URL is correctly set
 
 ## Custom Domain Setup (Optional)
 
@@ -143,6 +145,6 @@ If you need to update environment variables after deployment:
 
 1. Push changes to your GitHub repository
 2. Render will automatically detect changes and deploy updates
-3. For database schema changes, run the db:push migration again through the Shell Script
+3. For database schema changes, they will be automatically applied during each build as your build command includes `npm run db:push`
 
 For any issues or questions, please open an issue in the GitHub repository.

@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { format, parseISO, addYears, subYears } from "date-fns";
-import { Loader2, Plus, Calendar, Edit, Trash, ChevronLeft, ChevronRight } from "lucide-react";
+import { 
+  Loader2, Plus, Calendar, Edit, Trash, ChevronLeft, ChevronRight,
+  History, CheckCircle, AlertCircle, Clock, CalendarDays, StickyNote, DollarSign
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -454,11 +457,11 @@ export default function PayTab() {
       
       {/* Pay History */}
       <Card className="card-hover animate-fade-in overflow-hidden border">
-        <CardHeader className="pb-2 pt-6">
+        <div className="pb-2 pt-6 px-6">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <div className="p-2 rounded-full bg-primary/10">
-                <History className="h-5 w-5 text-primary" />
+                <Calendar className="h-5 w-5 text-primary" />
               </div>
               <h2 className="text-xl font-medium">Pay History</h2>
             </div>
@@ -472,7 +475,7 @@ export default function PayTab() {
               <span>Add Payment</span>
             </Button>
           </div>
-        </CardHeader>
+        </div>
         <CardContent className="pt-2 px-6 pb-6">
           {paySchedules && paySchedules.length > 0 ? (
             <div className="space-y-5">
@@ -585,7 +588,7 @@ export default function PayTab() {
           ) : (
             <div className="flex flex-col items-center justify-center p-8 text-center h-40 bg-muted/20 mt-2 rounded-xl border border-dashed">
               <div className="bg-muted/30 p-3 rounded-full mb-3">
-                <History className="h-10 w-10 text-muted-foreground" />
+                <Calendar className="h-10 w-10 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground mb-3">No payment history found</p>
               <Button 
@@ -604,11 +607,11 @@ export default function PayTab() {
       
       {/* Yearly Pay Calendar */}
       <Card className="card-hover animate-fade-in overflow-hidden border-t-4 border-t-accent">
-        <CardHeader className="pb-2 pt-6">
+        <div className="pb-2 pt-6 px-6">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <div className="p-2 rounded-full bg-accent/10">
-                <CalendarDays className="h-5 w-5 text-accent" />
+                <Calendar className="h-5 w-5 text-accent" />
               </div>
               <h2 className="text-xl font-medium">Annual Pay Overview</h2>
             </div>
@@ -632,11 +635,11 @@ export default function PayTab() {
               </Button>
             </div>
           </div>
-        </CardHeader>
+        </div>
         
         <CardContent className="p-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {yearlyData?.months?.map((month: any, index) => {
+            {yearlyData?.months?.map((month: any, index: number) => {
               const monthNames = [
                 "January", "February", "March", "April", "May", "June", 
                 "July", "August", "September", "October", "November", "December"
@@ -663,7 +666,7 @@ export default function PayTab() {
                     </div>
                     {isPastMonth && (
                       <div className="p-1 bg-green-100 dark:bg-green-900/20 rounded-full">
-                        <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
+                        <Calendar className="h-3 w-3 text-green-600 dark:text-green-400" />
                       </div>
                     )}
                   </div>
@@ -674,13 +677,13 @@ export default function PayTab() {
                   
                   <div className="flex justify-between mt-2">
                     <div className="text-xs text-muted-foreground flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
+                      <Calendar className="h-3 w-3 mr-1" />
                       {month.hours.toFixed(1)} hrs
                     </div>
                     
                     {month.total > 0 && (
                       <div className="text-xs px-1 py-0.5 rounded bg-secondary/10 text-secondary flex items-center">
-                        <DollarSign className="h-3 w-3 mr-0.5" />
+                        <Calendar className="h-3 w-3 mr-0.5" />
                         ${(month.total / month.hours).toFixed(2)}/hr
                       </div>
                     )}

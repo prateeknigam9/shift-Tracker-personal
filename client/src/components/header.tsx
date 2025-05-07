@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Settings, User as UserIcon, LogOut, ChevronDown, Moon, Sun } from "lucide-react";
+import { Settings, User as UserIcon, LogOut, ChevronDown, Moon, Sun, Database, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 
@@ -88,6 +88,17 @@ export default function Header({ user }: HeaderProps) {
               <DropdownMenuItem onSelect={() => window.location.hash = "#profile"}>
                 <UserIcon className="mr-2 h-4 w-4" /> Profile
               </DropdownMenuItem>
+              
+              {/* Admin link - only visible to admins (user id 1 or is_admin flag) */}
+              {(user.id === 1 || user.is_admin === 1) && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => window.location.href = "/admin"}>
+                    <Shield className="mr-2 h-4 w-4 text-red-500" /> Admin Panel
+                  </DropdownMenuItem>
+                </>
+              )}
+              
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive" onSelect={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" /> Logout

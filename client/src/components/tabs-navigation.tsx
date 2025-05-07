@@ -10,6 +10,7 @@ export default function TabsNavigation({ activeTab, setActiveTab }: TabsNavigati
     { id: "shifts", label: "Shifts" },
     { id: "pay", label: "Pay Overview" },
     { id: "notes", label: "Notes" },
+    { id: "analytics", label: "Analytics" },
     { id: "profile", label: "Profile" },
   ];
   

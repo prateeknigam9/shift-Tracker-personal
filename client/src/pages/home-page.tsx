@@ -7,6 +7,7 @@ import ShiftsTab from "@/pages/shifts-tab";
 import PayTab from "@/pages/pay-tab";
 import NotesTab from "@/pages/notes-tab";
 import ProfileTab from "@/pages/profile-tab";
+import AnalyticsTab from "@/pages/analytics-tab";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<string>("shifts");
@@ -25,6 +26,7 @@ export default function HomePage() {
           {activeTab === "shifts" && <ShiftsTab />}
           {activeTab === "pay" && <PayTab />}
           {activeTab === "notes" && <NotesTab />}
+          {activeTab === "analytics" && <AnalyticsTab />}
           {activeTab === "profile" && <ProfileTab />}
         </div>
       </main>

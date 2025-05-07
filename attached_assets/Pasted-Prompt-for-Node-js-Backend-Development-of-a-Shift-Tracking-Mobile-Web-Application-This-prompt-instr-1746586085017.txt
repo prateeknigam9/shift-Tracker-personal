@@ -1,0 +1,274 @@
+Prompt for Node.js Backend Development of a Shift Tracking Mobile Web Application
+This prompt instructs an AI coding agent to develop a secure, modular, and well-documented Node.js backend for a multi-user shift tracking mobile web application. The app enables users to manage part-time shift schedules, calculate pay, and access AI-powered insights, with strict data isolation for each user. The backend will integrate with an Angular frontend, use PostgreSQL for data storage, and leverage the Groq API for AI features.
+Application Overview
+
+Purpose: Provide a RESTful API to support shift management, pay calculations, and personalized insights for a mobile web app.
+Framework: Build with Express.js for a scalable RESTful API.
+Database: Use PostgreSQL for persistent storage of user and shift data.
+AI Integration: Utilize the Groq API for generating summaries and processing notes.
+Security: Ensure secure authentication and user-specific data access.
+
+Requirements
+1. Authentication
+
+Features:
+Register users with username, password, and full name.
+Support login to generate a JSON Web Token (JWT) for authenticated requests.
+Hash passwords securely before storage.
+
+
+Implementation:
+Use jsonwebtoken for JWT creation and verification.
+Use bcrypt for password hashing.
+Store user data in a users table.
+
+
+Endpoints:
+POST /auth/register: Create a new user.
+POST /auth/login: Authenticate user and return a JWT.
+
+
+
+2. Shift Management
+
+Features:
+Enable CRUD operations for shifts, accessible only by the authenticated user.
+Store shift details: date, start time, end time, break time (in hours), notes, hourly rate, and calculated total pay.
+Restrict shift access to the owning user.
+
+
+Implementation:
+Use a shifts table with a foreign key (user_id) to the users table.
+Calculate total pay: ((end_time - start_time in hours) - break_time) * hourly_rate.
+
+
+Endpoints:
+GET /shifts: Retrieve all shifts for the user.
+POST /shifts: Create a new shift.
+PUT /shifts/:id: Update an existing shift.
+DELETE /shifts/:id: Delete a shift.
+
+
+
+3. Pay Calculation
+
+Features:
+Calculate and retrieve daily and weekly pay based on shift data.
+
+
+Implementation:
+Aggregate total_rate for specified dates or weeks.
+
+
+Endpoints:
+GET /pay/daily?date=YYYY-MM-DD: Get pay for a specific day.
+GET /pay/weekly?week_start=YYYY-MM-DD: Get pay for a specific week.
+
+
+
+4. Dashboard Data
+
+Features:
+Provide data for weekly/monthly line graphs of hours worked and pay.
+Generate an AI-powered summary of work patterns.
+
+
+Implementation:
+Aggregate shift data by week or month for graph visualization.
+Use the Groq API with a prompt (e.g., "Summarize this work data: [shift details]") to generate summaries.
+
+
+Endpoints:
+GET /dashboard/data?period=weekly|monthly: Fetch graph data.
+GET /dashboard/summary: Retrieve AI-generated summary.
+
+
+
+5. Profile Management
+
+Features:
+Allow users to view and update their full name.
+Support password updates.
+
+
+Endpoints:
+GET /profile: Fetch user profile details.
+PUT /profile: Update full name.
+PUT /password: Update password.
+
+
+
+6. Backup
+
+Features:
+Export user shifts as a CSV file.
+Import shifts from a CSV file.
+
+
+Implementation:
+Use multer for handling file uploads.
+Use csv-parser for parsing CSV files.
+
+
+Endpoints:
+GET /backup/export: Download shifts as a CSV file.
+POST /backup/import: Upload and process a CSV file to import shifts.
+
+
+
+7. AI Integration
+
+Features:
+Use the Groq API to generate dashboard summaries.
+Optionally process shift notes for AI-enhanced summaries or suggestions.
+
+
+Implementation:
+Integrate the groq-sdk package for Groq API interactions.
+Send shift data or notes with tailored prompts to the Groq API.
+
+
+Endpoints:
+POST /notes/process: Process notes with AI (optional).
+
+
+
+8. Achievements
+
+Features:
+Assign achievements based on shift milestones (e.g., "Worked 100 hours").
+Optionally use the Groq API to generate creative achievement descriptions.
+
+
+Implementation:
+Define achievement rules (e.g., total hours worked, total pay earned).
+Store achievements in a separate table or as part of user data.
+
+
+Endpoints:
+GET /achievements: Retrieve user achievements.
+
+
+
+Database Schema
+
+
+
+Table
+Columns
+
+
+
+users
+id (serial, primary key), username (unique, text), password_hash (text), full_name (text)
+
+
+shifts
+id (serial, primary key), user_id (integer, foreign key to users.id), date (date), start_time (time), end_time (time), break_time (numeric, hours), notes (text), hourly_rate (numeric), total_rate (numeric)
+
+
+
+Relationships: shifts.user_id references users.id.
+Note: Calculate and store total_rate during shift creation or update.
+
+Technical Specifications
+
+Framework: Use Express.js for building the API.
+Database: Use the pg module for PostgreSQL interactions.
+Authentication: Implement JWT with jsonwebtoken and password hashing with bcrypt.
+AI Integration: Use the groq-sdk package (Groq TypeScript Client).
+File Handling: Use multer for CSV uploads and csv-parser for parsing.
+Code Structure:
+Organize into folders: routes/, controllers/, models/, middleware/.
+Example: routes/shifts.js for shift routes, controllers/shiftController.js for business logic.
+
+
+Security:
+Create middleware to validate JWT for protected routes.
+Sanitize inputs to prevent SQL injection.
+Filter database queries by user_id to ensure data isolation.
+
+
+Error Handling:
+Return descriptive error messages with appropriate HTTP status codes (e.g., 400 for bad requests, 401 for unauthorized).
+
+
+CORS: Configure CORS to allow requests from the Angular frontend.
+Logging: Implement basic logging with winston or console logs for debugging.
+
+Environment Variables
+
+
+
+Variable
+Description
+
+
+
+DATABASE_URL
+PostgreSQL connection string
+
+
+GROQ_API_KEY
+API key for the Groq service
+
+
+JWT_SECRET
+Secret key for signing JWT tokens
+
+
+
+Configuration: Load variables from a .env file using dotenv.
+
+Frontend Integration
+The backend will support an Angular frontend with four tabs:
+
+Shifts:
+Weekly/monthly schedule views.
+Weekly/monthly pay summaries.
+AI-generated insights.
+Action button to add shifts.
+Toggleable trend/bar charts (hours worked, weekly pay).
+
+
+Pay Overview:
+Pay calculations and details.
+Recent and next pay dates (editable).
+Yearly pay calendar (monthly pay dates and amounts).
+
+
+Notes:
+Write and rephrase notes, saving them to shifts.
+
+
+Profile:
+User details, achievements, logout/switch account options.
+
+
+
+
+Settings (Accessible on All Tabs):
+General: Pay settings, display settings (theme toggle).
+Backup: Export/import data as CSV.
+
+
+
+Additional Notes
+
+RESTful Design: Follow REST conventions (e.g., GET for retrieval, POST for creation).
+Scalability: Write modular code to support future enhancements.
+AI Usage: Assume the Groq API supports text generation; integrate via groq-sdk.
+Achievements: Define simple milestone-based rules; enhance with AI-generated descriptions if feasible.
+Data Isolation: Always filter queries by user_id to prevent unauthorized access.
+
+Deliverable
+Generate a complete Node.js backend codebase, including:
+
+server.js: Main entry point.
+Route files (e.g., routes/auth.js, routes/shifts.js).
+Controllers (e.g., controllers/shiftController.js).
+Models for database interactions.
+Middleware for authentication and validation.
+package.json with all dependencies.
+Configuration files (e.g., .env.example).Ensure the code is well-documented, adheres to best practices, and is ready for integration with an Angular frontend.
+

@@ -64,7 +64,8 @@ import {
   ShieldAlert, 
   Loader2,
   CheckCircle2,
-  KeyRound
+  KeyRound,
+  ChevronLeft
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -321,6 +322,17 @@ export default function AdminPage() {
     <div className="container mx-auto p-4">
       <div className="mb-6 flex justify-between items-center">
         <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => window.location.href = "/"} 
+              className="hover:bg-background"
+            >
+              <ChevronLeft className="h-5 w-5 mr-1" />
+              Back to Dashboard
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold gradient-text">Database Administration</h1>
           <p className="text-muted-foreground">
             Manage your application database with root-level access

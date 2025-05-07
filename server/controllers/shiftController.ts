@@ -49,11 +49,18 @@ export const createShift = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
     
-    // Validate shift data
-    const shiftData = insertShiftSchema.parse({
+    // Prepare shift data - ensure numeric fields are properly formatted as strings
+    const formattedData = {
       ...req.body,
-      user_id: req.user.id
-    });
+      user_id: req.user.id,
+      // Convert numeric values to strings if they aren't already
+      break_time: typeof req.body.break_time === 'number' ? String(req.body.break_time) : req.body.break_time,
+      hourly_rate: typeof req.body.hourly_rate === 'number' ? String(req.body.hourly_rate) : req.body.hourly_rate,
+      total_pay: typeof req.body.total_pay === 'number' ? String(req.body.total_pay) : req.body.total_pay
+    };
+    
+    // Validate shift data
+    const shiftData = insertShiftSchema.parse(formattedData);
     
     // Calculate total pay if not provided
     if (!shiftData.total_pay) {
@@ -67,8 +74,8 @@ export const createShift = async (req: Request, res: Response) => {
       // Subtract break time
       hoursWorked -= Number(shiftData.break_time);
       
-      // Calculate total pay
-      shiftData.total_pay = hoursWorked * Number(shiftData.hourly_rate);
+      // Calculate total pay and convert to string (for numeric db field)
+      shiftData.total_pay = String(hoursWorked * Number(shiftData.hourly_rate));
     }
     
     const shift = await storage.createShift(shiftData);
@@ -103,8 +110,21 @@ export const updateShift = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Shift not found" });
     }
     
-    // Validate updated data
-    const updateData = req.body;
+    // Prepare and format updated data
+    const updateData = { ...req.body };
+    
+    // Convert numeric values to strings
+    if (typeof updateData.break_time === 'number') {
+      updateData.break_time = String(updateData.break_time);
+    }
+    
+    if (typeof updateData.hourly_rate === 'number') {
+      updateData.hourly_rate = String(updateData.hourly_rate);
+    }
+    
+    if (typeof updateData.total_pay === 'number') {
+      updateData.total_pay = String(updateData.total_pay);
+    }
     
     // Calculate total pay if times or rates are updated
     if (updateData.start_time || updateData.end_time || 
@@ -122,8 +142,8 @@ export const updateShift = async (req: Request, res: Response) => {
       // Subtract break time
       hoursWorked -= breakTime;
       
-      // Calculate total pay
-      updateData.total_pay = hoursWorked * hourlyRate;
+      // Calculate total pay and convert to string (for numeric db field)
+      updateData.total_pay = String(hoursWorked * hourlyRate);
     }
     
     const updatedShift = await storage.updateShift(req.user.id, shiftId, updateData);

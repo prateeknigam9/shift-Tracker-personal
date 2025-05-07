@@ -6,6 +6,7 @@ import { AuthProvider } from "./hooks/use-auth";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
+import { ProtectedRoute } from "./lib/protected-route";
 
 function App() {
   return (
@@ -14,9 +15,9 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Switch>
-            <Route path="/">
+            <ProtectedRoute path="/">
               <HomePage />
-            </Route>
+            </ProtectedRoute>
             <Route path="/auth">
               <AuthPage />
             </Route>

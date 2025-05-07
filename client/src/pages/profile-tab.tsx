@@ -199,9 +199,9 @@ export default function ProfileTab() {
     },
     {
       id: 2,
-      title: "$1000 Earned",
-      description: "You've earned over $1000! Your hard work is paying off.",
-      icon: <DollarSign className="h-5 w-5 text-secondary" />,
+      title: "€1000 Earned",
+      description: "You've earned over €1000! Your hard work is paying off.",
+      icon: <span className="h-5 w-5 flex items-center justify-center text-secondary font-bold">€</span>,
       bgColor: "bg-secondary-light"
     },
     {

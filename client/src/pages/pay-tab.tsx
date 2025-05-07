@@ -487,7 +487,7 @@ export default function PayTab() {
                   const endDate = new Date(schedule.period_end as string);
                   const payDate = new Date(schedule.pay_date as string);
                   
-                  const hours = Math.round(Number(schedule.amount) / 16); // Estimate hours based on average $16/hour
+                  const hours = Math.round(Number(schedule.amount) / 16); // Estimate hours based on average €16/hour
                   
                   // Status styles
                   const getStatusStyles = (status: string) => {
@@ -559,7 +559,7 @@ export default function PayTab() {
                         
                         <div className="flex flex-col items-end">
                           <div className="text-xl font-bold font-mono mb-2">
-                            ${Number(schedule.amount).toFixed(2)}
+                            €{Number(schedule.amount).toFixed(2)}
                           </div>
                           <div className="flex space-x-1">
                             <Button 
@@ -672,7 +672,7 @@ export default function PayTab() {
                   </div>
                   
                   <div className={`font-mono text-xl font-bold ${isCurrentMonth ? 'text-primary' : ''}`}>
-                    ${month.total.toFixed(2)}
+                    €{month.total.toFixed(2)}
                   </div>
                   
                   <div className="flex justify-between mt-2">
@@ -683,8 +683,9 @@ export default function PayTab() {
                     
                     {month.total > 0 && (
                       <div className="text-xs px-1.5 py-0.5 rounded-full bg-secondary/10 text-secondary flex items-center shadow-sm">
-                        <DollarSign className="h-3 w-3 mr-0.5" />
-                        ${(month.total / month.hours).toFixed(2)}/hr
+                        {/* Use Euro symbol instead of Dollar */}
+                        <span className="font-bold mr-0.5">€</span>
+                        €{(month.total / month.hours).toFixed(2)}/hr
                       </div>
                     )}
                   </div>
@@ -719,7 +720,7 @@ export default function PayTab() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount ($)</Label>
+                <Label htmlFor="amount">Amount (€)</Label>
                 <Input
                   id="amount"
                   type="number"

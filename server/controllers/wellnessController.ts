@@ -4,8 +4,11 @@ import {
   insertWellnessMetricSchema, 
   updateWellnessMetricSchema,
   insertWellnessGoalSchema,
-  updateWellnessGoalSchema
+  updateWellnessGoalSchema,
+  WellnessMetric,
+  WellnessGoal
 } from "@shared/schema";
+import { ZodError } from "zod";
 
 // Wellness Metrics Controllers
 export const getWellnessMetrics = async (req: Request, res: Response) => {
@@ -53,7 +56,7 @@ export const createWellnessMetric = async (req: Request, res: Response) => {
     res.status(201).json(metric);
   } catch (error) {
     console.error("Error creating wellness metric:", error);
-    if (error.name === "ZodError") {
+    if (error instanceof ZodError) {
       return res.status(400).json({ message: "Invalid input data", errors: error.errors });
     }
     res.status(500).json({ message: "Failed to create wellness metric" });
@@ -76,7 +79,7 @@ export const updateWellnessMetric = async (req: Request, res: Response) => {
     res.status(200).json(updatedMetric);
   } catch (error) {
     console.error("Error updating wellness metric:", error);
-    if (error.name === "ZodError") {
+    if (error instanceof ZodError) {
       return res.status(400).json({ message: "Invalid input data", errors: error.errors });
     }
     res.status(500).json({ message: "Failed to update wellness metric" });
@@ -147,7 +150,7 @@ export const createWellnessGoal = async (req: Request, res: Response) => {
     res.status(201).json(goal);
   } catch (error) {
     console.error("Error creating wellness goal:", error);
-    if (error.name === "ZodError") {
+    if (error instanceof ZodError) {
       return res.status(400).json({ message: "Invalid input data", errors: error.errors });
     }
     res.status(500).json({ message: "Failed to create wellness goal" });
@@ -170,7 +173,7 @@ export const updateWellnessGoal = async (req: Request, res: Response) => {
     res.status(200).json(updatedGoal);
   } catch (error) {
     console.error("Error updating wellness goal:", error);
-    if (error.name === "ZodError") {
+    if (error instanceof ZodError) {
       return res.status(400).json({ message: "Invalid input data", errors: error.errors });
     }
     res.status(500).json({ message: "Failed to update wellness goal" });
@@ -216,33 +219,33 @@ export const getWellnessSummary = async (req: Request, res: Response) => {
     };
     
     if (recentMetrics.length > 0) {
-      averageScores.stress_level = recentMetrics.reduce((sum, metric) => sum + metric.stress_level, 0) / recentMetrics.length;
-      averageScores.rest_quality = recentMetrics.reduce((sum, metric) => sum + metric.rest_quality, 0) / recentMetrics.length;
-      averageScores.work_satisfaction = recentMetrics.reduce((sum, metric) => sum + metric.work_satisfaction, 0) / recentMetrics.length;
-      averageScores.balance_score = recentMetrics.reduce((sum, metric) => sum + metric.balance_score, 0) / recentMetrics.length;
+      averageScores.stress_level = recentMetrics.reduce((sum: number, metric: WellnessMetric) => sum + metric.stress_level, 0) / recentMetrics.length;
+      averageScores.rest_quality = recentMetrics.reduce((sum: number, metric: WellnessMetric) => sum + metric.rest_quality, 0) / recentMetrics.length;
+      averageScores.work_satisfaction = recentMetrics.reduce((sum: number, metric: WellnessMetric) => sum + metric.work_satisfaction, 0) / recentMetrics.length;
+      averageScores.balance_score = recentMetrics.reduce((sum: number, metric: WellnessMetric) => sum + metric.balance_score, 0) / recentMetrics.length;
     }
     
     // Calculate total work hours and overtime
-    const totalHours = recentMetrics.reduce((sum, metric) => sum + parseFloat(metric.work_hours as string), 0);
-    const totalOvertime = recentMetrics.reduce((sum, metric) => sum + parseFloat(metric.overtime_hours as string), 0);
+    const totalHours = recentMetrics.reduce((sum: number, metric: WellnessMetric) => sum + parseFloat(metric.work_hours as string), 0);
+    const totalOvertime = recentMetrics.reduce((sum: number, metric: WellnessMetric) => sum + parseFloat(metric.overtime_hours as string), 0);
     
     // Calculate goal progress
-    const goalProgress = activeGoals.map(goal => {
+    const goalProgress = activeGoals.map((goal: WellnessGoal) => {
       let progress = 0;
       let currentValue = 0;
       
       switch (goal.goal_type) {
         case 'max_weekly_hours':
           currentValue = recentMetrics
-            .filter(m => new Date(m.date as string) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
-            .reduce((sum, m) => sum + parseFloat(m.work_hours as string), 0);
+            .filter((m: WellnessMetric) => new Date(m.date as string) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+            .reduce((sum: number, m: WellnessMetric) => sum + parseFloat(m.work_hours as string), 0);
           progress = Math.min(100, (1 - (currentValue / parseFloat(goal.target_value as string))) * 100);
           break;
         case 'min_rest_days':
           const restDays = new Set(
             recentMetrics
-              .filter(m => parseFloat(m.work_hours as string) === 0)
-              .map(m => m.date)
+              .filter((m: WellnessMetric) => parseFloat(m.work_hours as string) === 0)
+              .map((m: WellnessMetric) => m.date)
           ).size;
           progress = Math.min(100, (restDays / parseFloat(goal.target_value as string)) * 100);
           break;
@@ -261,7 +264,11 @@ export const getWellnessSummary = async (req: Request, res: Response) => {
     });
     
     // Identify trends
-    const trends = {
+    const trends: { 
+      improving: string[], 
+      declining: string[], 
+      steady: string[] 
+    } = {
       improving: [],
       declining: [],
       steady: []
@@ -272,17 +279,17 @@ export const getWellnessSummary = async (req: Request, res: Response) => {
       const secondWeek = recentMetrics.slice(-7);
       
       const firstWeekAvg = {
-        stress_level: firstWeek.reduce((sum, m) => sum + m.stress_level, 0) / firstWeek.length,
-        rest_quality: firstWeek.reduce((sum, m) => sum + m.rest_quality, 0) / firstWeek.length,
-        work_satisfaction: firstWeek.reduce((sum, m) => sum + m.work_satisfaction, 0) / firstWeek.length,
-        balance_score: firstWeek.reduce((sum, m) => sum + m.balance_score, 0) / firstWeek.length
+        stress_level: firstWeek.reduce((sum: number, m: WellnessMetric) => sum + m.stress_level, 0) / firstWeek.length,
+        rest_quality: firstWeek.reduce((sum: number, m: WellnessMetric) => sum + m.rest_quality, 0) / firstWeek.length,
+        work_satisfaction: firstWeek.reduce((sum: number, m: WellnessMetric) => sum + m.work_satisfaction, 0) / firstWeek.length,
+        balance_score: firstWeek.reduce((sum: number, m: WellnessMetric) => sum + m.balance_score, 0) / firstWeek.length
       };
       
       const secondWeekAvg = {
-        stress_level: secondWeek.reduce((sum, m) => sum + m.stress_level, 0) / secondWeek.length,
-        rest_quality: secondWeek.reduce((sum, m) => sum + m.rest_quality, 0) / secondWeek.length,
-        work_satisfaction: secondWeek.reduce((sum, m) => sum + m.work_satisfaction, 0) / secondWeek.length,
-        balance_score: secondWeek.reduce((sum, m) => sum + m.balance_score, 0) / secondWeek.length
+        stress_level: secondWeek.reduce((sum: number, m: WellnessMetric) => sum + m.stress_level, 0) / secondWeek.length,
+        rest_quality: secondWeek.reduce((sum: number, m: WellnessMetric) => sum + m.rest_quality, 0) / secondWeek.length,
+        work_satisfaction: secondWeek.reduce((sum: number, m: WellnessMetric) => sum + m.work_satisfaction, 0) / secondWeek.length,
+        balance_score: secondWeek.reduce((sum: number, m: WellnessMetric) => sum + m.balance_score, 0) / secondWeek.length
       };
       
       // Check stress level (lower is better)
@@ -323,7 +330,7 @@ export const getWellnessSummary = async (req: Request, res: Response) => {
     }
     
     // Prepare personalized recommendations based on metrics and trends
-    let recommendations = [];
+    const recommendations: string[] = [];
     
     if (trends.declining.includes('stress_level')) {
       recommendations.push("Your stress levels appear to be increasing. Consider taking breaks between shifts and practicing stress-reduction techniques.");

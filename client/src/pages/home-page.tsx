@@ -8,7 +8,7 @@ import PayTab from "@/pages/pay-tab";
 import NotesTab from "@/pages/notes-tab";
 import ProfileTab from "@/pages/profile-tab";
 import AnalyticsTab from "@/pages/analytics-tab";
-import WellnessTab from "@/pages/wellness-tab";
+import KpiTab from "@/pages/kpi-tab";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<string>("shifts");
@@ -28,7 +28,7 @@ export default function HomePage() {
           {activeTab === "pay" && <PayTab />}
           {activeTab === "notes" && <NotesTab />}
           {activeTab === "analytics" && <AnalyticsTab />}
-          {activeTab === "wellness" && <WellnessTab />}
+          {activeTab === "kpi" && <KpiTab />}
           {activeTab === "profile" && <ProfileTab />}
         </div>
       </main>

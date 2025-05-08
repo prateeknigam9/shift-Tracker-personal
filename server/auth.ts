@@ -35,9 +35,12 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      // secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    }
+    },
+    rolling: true, // Refresh session on activity
+    name: 'sessionId' // Custom session cookie name
   };
 
   app.set("trust proxy", 1);

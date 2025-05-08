@@ -67,6 +67,9 @@ export class DatabaseStorage implements IStorage {
     this.sessionStore = new PostgresSessionStore({
       pool: (pool as any),
       createTableIfMissing: true,
+      tableName: 'session',
+      pruneSessionInterval: 60, // Prune expired sessions every 60 seconds
+      errorLog: (...args: any[]) => console.error('Session store error:', ...args)
     });
   }
   

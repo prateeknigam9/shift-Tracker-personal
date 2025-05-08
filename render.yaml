@@ -11,6 +11,9 @@ services:
         fromDatabase:
           name: shift-tracker-db
           property: connectionString
+    domains:
+      - name: prateek.com
+      - name: www.prateek.com
 
 databases:
   - name: shift-tracker-db
